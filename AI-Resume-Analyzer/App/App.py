@@ -123,15 +123,15 @@ try:
         print("Connecting to MongoDB Atlas...")
         client = MongoClient(
             mongodb_uri,
-            serverSelectionTimeoutMS=10000,
-            connectTimeoutMS=10000,
-            socketTimeoutMS=10000,
+            serverSelectionTimeoutMS=3000,  # Reduced from 10000
+            connectTimeoutMS=3000,  # Reduced from 10000
+            socketTimeoutMS=3000,  # Reduced from 10000
             retryWrites=True,
             w='majority'
         )
     else:
         print("Connecting to local MongoDB...")
-        client = MongoClient(mongodb_uri)
+        client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=3000)
     
     # Test connection with timeout
     client.admin.command('ping')
@@ -525,21 +525,66 @@ def show_dashboard():
             show_pdf(save_image_path)
 
             ### parsing and extracting whole resume 
+            resume_data = None
             try:
                 resume_data = ResumeParser(save_image_path).get_extracted_data()
-                # Debug: Print extracted data
                 print("DEBUG - Extracted resume data:", resume_data)
             except Exception as e:
-                st.error(f"Error parsing resume: {str(e)}")
-                st.warning("Please make sure you uploaded a valid PDF file.")
-                import traceback
-                print("ERROR:", traceback.format_exc())
-                return
+                print(f"pyresparser failed: {str(e)}")
+                st.info("Using alternative parsing method...")
+                
+                # Fallback: Extract text and create basic resume_data
+                try:
+                    resume_text = pdf_reader(save_image_path)
+                    
+                    # Basic extraction using regex and text analysis
+                    import re
+                    
+                    # Try to extract email
+                    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                    emails = re.findall(email_pattern, resume_text)
+                    email = emails[0] if emails else None
+                    
+                    # Try to extract phone
+                    phone_pattern = r'[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}'
+                    phones = re.findall(phone_pattern, resume_text)
+                    phone = phones[0] if phones else None
+                    
+                    # Extract name (first line usually)
+                    lines = [line.strip() for line in resume_text.split('\n') if line.strip()]
+                    name = lines[0] if lines else None
+                    
+                    # Count pages
+                    with open(save_image_path, 'rb') as f:
+                        from pdfminer3.pdfpage import PDFPage
+                        pages = list(PDFPage.get_pages(f))
+                        no_of_pages = len(pages)
+                    
+                    # Create basic resume_data structure
+                    resume_data = {
+                        'name': name,
+                        'email': email,
+                        'mobile_number': phone,
+                        'skills': [],
+                        'no_of_pages': no_of_pages,
+                        'degree': None
+                    }
+                    
+                    st.success("Resume parsed successfully using alternative method!")
+                    print("DEBUG - Fallback resume data:", resume_data)
+                    
+                except Exception as fallback_error:
+                    st.error("Unable to parse the resume. Please ensure it's a valid PDF with text (not scanned image).")
+                    print(f"Fallback parsing also failed: {str(fallback_error)}")
+                    import traceback
+                    print("ERROR:", traceback.format_exc())
+                    return
                 
             if resume_data:
                 
-                ## Get the whole resume data into resume_text
-                resume_text = pdf_reader(save_image_path)
+                ## Get the whole resume data into resume_text (if not already loaded)
+                if 'resume_text' not in locals():
+                    resume_text = pdf_reader(save_image_path)
                 print("DEBUG - Resume text length:", len(resume_text) if resume_text else 0)
 
                 ## Showing Analyzed data from (resume_data)
