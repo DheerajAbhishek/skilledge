@@ -468,19 +468,28 @@ def show_dashboard():
         sec_token = secrets.token_urlsafe(12)
         host_name = socket.gethostname()
         ip_add = socket.gethostbyname(host_name)
-        dev_user = os.getlogin()
+        # Use environment variable or fallback for Docker/cloud environments
+        try:
+            dev_user = os.getlogin()
+        except:
+            dev_user = os.environ.get('USER', os.environ.get('USERNAME', 'webapp_user'))
         os_name_ver = platform.system() + " " + platform.release()
-        g = geocoder.ip('me')
-        latlong = g.latlng
-        geolocator = Nominatim(user_agent="http")
-        location = geolocator.reverse(latlong, language='en')
-        address = location.raw['address']
-        cityy = address.get('city', '')
-        statee = address.get('state', '')
-        countryy = address.get('country', '')  
-        city = cityy
-        state = statee
-        country = countryy
+        
+        # Geocoding - handle failures gracefully
+        try:
+            g = geocoder.ip('me')
+            latlong = g.latlng if g.latlng else [0, 0]
+            geolocator = Nominatim(user_agent="http")
+            location = geolocator.reverse(latlong, language='en')
+            address = location.raw['address']
+            city = address.get('city', 'Unknown')
+            state = address.get('state', 'Unknown')
+            country = address.get('country', 'Unknown')
+        except:
+            latlong = [0, 0]
+            city = 'Unknown'
+            state = 'Unknown'
+            country = 'Unknown'
 
 
         # Upload Resume - Larger upload area
