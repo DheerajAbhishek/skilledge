@@ -114,7 +114,17 @@ try:
     if not mongodb_uri:
         mongodb_uri = 'mongodb://localhost:27017/'
     
-    client = MongoClient(mongodb_uri)
+    # Connect with SSL/TLS parameters for MongoDB Atlas
+    client = MongoClient(
+        mongodb_uri,
+        serverSelectionTimeoutMS=5000,  # Faster timeout
+        tls=True,
+        tlsAllowInvalidCertificates=True  # For compatibility
+    )
+    
+    # Test connection
+    client.admin.command('ping')
+    
     db = client['skilledge_db']
     user_collection = db['user_data']
     feedback_collection = db['user_feedback']
