@@ -1,0 +1,41 @@
+# Virtual environments
+venvapp/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploaded files
+AI-Resume-Analyzer/App/Uploaded_Resumes/*.pdf
+
+# Environment files
+.env
+.streamlit/secrets.toml
+
+# Documentation
+*.md
+screenshots/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build files
+*.egg-info/
+dist/
+build/

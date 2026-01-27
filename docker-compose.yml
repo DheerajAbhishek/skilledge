@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  skilledge:
+    build: .
+    container_name: skilledge-app
+    ports:
+      - "8501:8501"
+    environment:
+      - MONGODB_URI=mongodb+srv://dheerajabhishek111_db_user:qBfhsjZKsKfzdhj2@cluster0.c4pnwwj.mongodb.net/?appName=Cluster0
+    volumes:
+      - ./AI-Resume-Analyzer/App/Uploaded_Resumes:/app/AI-Resume-Analyzer/App/Uploaded_Resumes
+    restart: unless-stopped
+    networks:
+      - skilledge-network
+
+networks:
+  skilledge-network:
+    driver: bridge
