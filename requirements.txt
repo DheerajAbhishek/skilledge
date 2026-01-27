@@ -5,7 +5,7 @@ pymongo[srv]
 dnspython
 nltk
 spacy>=3.0.0
-pyresparser
+git+https://github.com/OmkarPathak/pyresparser.git
 pdfminer3
 pdfminer.six
 docx2txt
