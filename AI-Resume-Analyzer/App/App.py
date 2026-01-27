@@ -97,8 +97,25 @@ def course_recommender(course_list):
 
 # MongoDB connector
 try:
-    client = MongoClient('mongodb://localhost:27017/')
-    db = client['resume_analyzer_db']
+    # Try to get MongoDB URI from Streamlit secrets (cloud) or environment variable
+    mongodb_uri = None
+    
+    # First, try Streamlit secrets (for Streamlit Cloud)
+    try:
+        mongodb_uri = st.secrets["MONGODB_URI"]
+    except:
+        pass
+    
+    # If not in secrets, try environment variable
+    if not mongodb_uri:
+        mongodb_uri = os.environ.get('MONGODB_URI')
+    
+    # If still not found, use local MongoDB
+    if not mongodb_uri:
+        mongodb_uri = 'mongodb://localhost:27017/'
+    
+    client = MongoClient(mongodb_uri)
+    db = client['skilledge_db']
     user_collection = db['user_data']
     feedback_collection = db['user_feedback']
     DB_AVAILABLE = True
