@@ -982,4 +982,6 @@ def show_about():
     ''', unsafe_allow_html=True)
 
 # Calling the main (run()) function to make the whole process run
-run()
+if __name__ == "__main__":
+    run()
+
