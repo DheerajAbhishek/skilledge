@@ -363,12 +363,12 @@ def show_login_page():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username", key="login_username")
+        password = st.text_input("Password", type="password", key="login_password")
         
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("Login", use_container_width=True):
+            if st.button("Login", use_container_width=True, key="login_button"):
                 if username and password:
                     success, message = login_user(username, password)
                     if success:
@@ -383,7 +383,7 @@ def show_login_page():
                     st.warning("Please fill in all fields")
         
         with col_b:
-            if st.button("Create Account", use_container_width=True):
+            if st.button("Create Account", use_container_width=True, key="create_account_button"):
                 st.session_state.page = 'signup'
                 st.rerun()
 
@@ -393,14 +393,14 @@ def show_signup_page():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        username = st.text_input("Username")
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+        username = st.text_input("Username", key="signup_username")
+        email = st.text_input("Email", key="signup_email")
+        password = st.text_input("Password", type="password", key="signup_password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm_password")
         
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("Sign Up", use_container_width=True):
+            if st.button("Sign Up", use_container_width=True, key="signup_button"):
                 if username and email and password and confirm_password:
                     if password == confirm_password:
                         success, message = signup_user(username, email, password)
@@ -417,7 +417,7 @@ def show_signup_page():
                     st.warning("Please fill in all fields")
         
         with col_b:
-            if st.button("Back to Login", use_container_width=True):
+            if st.button("Back to Login", use_container_width=True, key="back_to_login_button"):
                 st.session_state.page = 'login'
                 st.rerun()
 
