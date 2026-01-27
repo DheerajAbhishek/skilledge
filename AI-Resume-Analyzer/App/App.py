@@ -459,8 +459,12 @@ def show_dashboard():
             with st.spinner('Hang On While We Cook Magic For You...'):
                 time.sleep(4)
         
+            ### Create Uploaded_Resumes directory if it doesn't exist
+            upload_dir = './Uploaded_Resumes'
+            os.makedirs(upload_dir, exist_ok=True)
+            
             ### saving the uploaded resume to folder
-            save_image_path = './Uploaded_Resumes/'+pdf_file.name
+            save_image_path = os.path.join(upload_dir, pdf_file.name)
             pdf_name = pdf_file.name
             with open(save_image_path, "wb") as f:
                 f.write(pdf_file.getbuffer())
