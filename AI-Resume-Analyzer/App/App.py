@@ -500,7 +500,7 @@ def show_dashboard():
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
             ## file upload in pdf format with larger area
-            pdf_file = st.file_uploader("", type=["pdf"], help="Upload your resume in PDF format", label_visibility="collapsed")
+            pdf_file = st.file_uploader("Upload Resume", type=["pdf"], help="Upload your resume in PDF format", label_visibility="collapsed")
         if pdf_file is not None:
             with st.spinner('Hang On While We Cook Magic For You...'):
                 time.sleep(4)
