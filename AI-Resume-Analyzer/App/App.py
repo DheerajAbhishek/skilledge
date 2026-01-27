@@ -358,6 +358,14 @@ def render_navbar(username):
 ###### Main function run() ######
 
 def run():
+    # Initialize session state first (before any checks)
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+    if 'username' not in st.session_state:
+        st.session_state.username = None
+    if 'page' not in st.session_state:
+        st.session_state.page = 'login'
+    
     load_css()
     
     # If database is not available, skip authentication
@@ -365,7 +373,7 @@ def run():
         st.warning("⚠️ Running in demo mode - Database unavailable. Authentication and data saving are disabled.")
         st.session_state.logged_in = True
         st.session_state.username = "Demo User"
-        if 'page' not in st.session_state or st.session_state.page in ['login', 'signup']:
+        if st.session_state.page in ['login', 'signup']:
             st.session_state.page = 'dashboard'
     
     # Check if user is logged in
