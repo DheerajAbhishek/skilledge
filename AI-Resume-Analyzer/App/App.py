@@ -103,35 +103,46 @@ try:
     # First, try Streamlit secrets (for Streamlit Cloud)
     try:
         mongodb_uri = st.secrets["MONGODB_URI"]
+        print("Using MongoDB URI from Streamlit secrets")
     except:
         pass
     
     # If not in secrets, try environment variable
     if not mongodb_uri:
         mongodb_uri = os.environ.get('MONGODB_URI')
+        if mongodb_uri:
+            print("Using MongoDB URI from environment variable")
     
     # If still not found, use local MongoDB
     if not mongodb_uri:
         mongodb_uri = 'mongodb://localhost:27017/'
+        print("Using local MongoDB")
     
-    # Connect with SSL/TLS parameters for MongoDB Atlas
-    client = MongoClient(
-        mongodb_uri,
-        serverSelectionTimeoutMS=5000,  # Faster timeout
-        tls=True,
-        tlsAllowInvalidCertificates=True  # For compatibility
-    )
+    # For MongoDB Atlas, we need special SSL handling
+    if 'mongodb+srv' in mongodb_uri or 'mongodb.net' in mongodb_uri:
+        print("Connecting to MongoDB Atlas...")
+        client = MongoClient(
+            mongodb_uri,
+            serverSelectionTimeoutMS=10000,
+            connectTimeoutMS=10000,
+            socketTimeoutMS=10000,
+            retryWrites=True,
+            w='majority'
+        )
+    else:
+        print("Connecting to local MongoDB...")
+        client = MongoClient(mongodb_uri)
     
-    # Test connection
+    # Test connection with timeout
     client.admin.command('ping')
     
     db = client['skilledge_db']
     user_collection = db['user_data']
     feedback_collection = db['user_feedback']
     DB_AVAILABLE = True
-    print("MongoDB connected successfully!")
+    print("✅ MongoDB connected successfully!")
 except Exception as e:
-    print(f"Warning: Database connection failed: {e}")
+    print(f"❌ MongoDB connection failed: {str(e)}")
     print("Running in demo mode without database. Data will not be saved.")
     client = None
     db = None
