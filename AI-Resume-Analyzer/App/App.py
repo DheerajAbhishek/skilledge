@@ -365,6 +365,201 @@ def render_navbar(username):
             st.session_state.page = 'login'
             st.rerun()
 
+###### AI-Powered Interview Questions Generator ######
+def generate_interview_questions(field, level, skills):
+    """Generate interview questions based on field and experience level"""
+    
+    questions_db = {
+        'Data Science': [
+            {'question': 'What is the difference between supervised and unsupervised learning?',
+             'answer': 'Supervised learning uses labeled data to train models (e.g., classification, regression), while unsupervised learning finds patterns in unlabeled data (e.g., clustering, dimensionality reduction).',
+             'tips': 'Give real-world examples like spam detection (supervised) vs customer segmentation (unsupervised).'},
+            {'question': 'Explain the bias-variance tradeoff.',
+             'answer': 'Bias is error from oversimplified models (underfitting). Variance is error from models too sensitive to training data (overfitting). The goal is to find the right balance for optimal generalization.',
+             'tips': 'Mention techniques like cross-validation and regularization to manage this tradeoff.'},
+            {'question': 'How do you handle missing data?',
+             'answer': 'Options include: deletion (listwise/pairwise), imputation (mean/median/mode, KNN, regression), or using algorithms that handle missing values (XGBoost). Choice depends on data pattern and amount.',
+             'tips': 'Discuss checking if data is MCAR, MAR, or MNAR before deciding approach.'},
+            {'question': 'What is feature engineering and why is it important?',
+             'answer': 'Feature engineering is creating new features from raw data to improve model performance. It includes normalization, encoding categoricals, creating interaction terms, and domain-specific transformations.',
+             'tips': 'Share a specific example where feature engineering significantly improved your model.'},
+            {'question': 'Explain cross-validation and its types.',
+             'answer': 'Cross-validation assesses model generalization. K-Fold splits data into k parts, training on k-1 and testing on 1 iteratively. Other types: Stratified K-Fold, Leave-One-Out, Time Series Split.',
+             'tips': 'Mention when to use which type based on dataset characteristics.'},
+        ],
+        'Web Development': [
+            {'question': 'Explain the difference between REST and GraphQL.',
+             'answer': 'REST uses multiple endpoints with fixed data structures. GraphQL uses a single endpoint where clients specify exact data needed, reducing over/under-fetching.',
+             'tips': 'Discuss pros/cons: REST is simpler and cacheable; GraphQL is flexible but more complex.'},
+            {'question': 'What is the Virtual DOM and how does it work?',
+             'answer': 'Virtual DOM is an in-memory representation of the real DOM. When state changes, a new virtual DOM is created, diffed with the old one, and only necessary changes are applied to the real DOM.',
+             'tips': 'Mention frameworks that use it (React) vs those that don\'t (Svelte compiles away).'},
+            {'question': 'How do you optimize website performance?',
+             'answer': 'Techniques include: minification, compression, lazy loading, CDN usage, caching, code splitting, image optimization, reducing HTTP requests, and using efficient algorithms.',
+             'tips': 'Mention tools like Lighthouse, WebPageTest for measuring performance.'},
+            {'question': 'Explain CORS and how to handle it.',
+             'answer': 'CORS (Cross-Origin Resource Sharing) is a security feature blocking requests to different domains. Handle via server headers (Access-Control-Allow-Origin) or proxy in development.',
+             'tips': 'Explain the preflight OPTIONS request for non-simple requests.'},
+            {'question': 'What are Web Components?',
+             'answer': 'Web Components are reusable custom elements using Custom Elements, Shadow DOM, and HTML Templates. They provide encapsulation and work across frameworks.',
+             'tips': 'Compare with framework-specific components like React or Vue components.'},
+        ],
+        'Android Development': [
+            {'question': 'Explain the Android Activity Lifecycle.',
+             'answer': 'Activities go through: onCreate → onStart → onResume (running) → onPause → onStop → onDestroy. Understanding this helps manage resources and handle configuration changes.',
+             'tips': 'Discuss saving state in onSaveInstanceState and restoring in onCreate.'},
+            {'question': 'What is the difference between Service and IntentService?',
+             'answer': 'Service runs on the main thread and handles multiple requests. IntentService runs on a worker thread, handles one request at a time, and stops itself when done.',
+             'tips': 'Note that IntentService is deprecated; recommend WorkManager for background tasks.'},
+            {'question': 'How does RecyclerView work?',
+             'answer': 'RecyclerView efficiently displays large lists by recycling views. Key components: Adapter (binds data), ViewHolder (caches views), LayoutManager (positions items).',
+             'tips': 'Discuss DiffUtil for efficient updates and view types for heterogeneous lists.'},
+            {'question': 'Explain Kotlin Coroutines for Android.',
+             'answer': 'Coroutines provide lightweight concurrency. Use viewModelScope/lifecycleScope for automatic cancellation. Dispatchers control threads: Main for UI, IO for network/disk.',
+             'tips': 'Compare with RxJava and explain structured concurrency benefits.'},
+            {'question': 'What is Jetpack Compose?',
+             'answer': 'Compose is Android\'s modern declarative UI toolkit. Uses composable functions, state-driven rendering, and eliminates XML layouts for more maintainable code.',
+             'tips': 'Discuss recomposition, remember, and state hoisting patterns.'},
+        ],
+        'IOS Development': [
+            {'question': 'Explain the iOS App Lifecycle.',
+             'answer': 'States: Not Running → Inactive → Active → Background → Suspended. AppDelegate/SceneDelegate methods handle transitions like applicationDidBecomeActive.',
+             'tips': 'Discuss differences between AppDelegate and SceneDelegate (iOS 13+).'},
+            {'question': 'What is ARC in Swift?',
+             'answer': 'ARC (Automatic Reference Counting) manages memory by tracking strong references. Objects are deallocated when reference count reaches zero. Use weak/unowned to prevent retain cycles.',
+             'tips': 'Give examples of retain cycles in closures and delegates.'},
+            {'question': 'Explain the difference between struct and class in Swift.',
+             'answer': 'Structs are value types (copied on assignment), classes are reference types (shared). Structs are preferred for immutable data; classes for shared mutable state or inheritance.',
+             'tips': 'Discuss when Apple recommends each and performance implications.'},
+            {'question': 'What is SwiftUI and how does it differ from UIKit?',
+             'answer': 'SwiftUI is declarative (describe what you want), UIKit is imperative (describe how to build). SwiftUI uses state-driven updates and works across Apple platforms.',
+             'tips': 'Discuss interoperability with UIViewRepresentable.'},
+            {'question': 'How do you handle concurrency in Swift?',
+             'answer': 'Options: GCD (DispatchQueue), OperationQueue, or async/await (Swift 5.5+). Async/await provides cleaner syntax with actors for thread-safe state.',
+             'tips': 'Explain MainActor for UI updates and Sendable protocol.'},
+        ],
+        'UI-UX Development': [
+            {'question': 'What is the difference between UX and UI design?',
+             'answer': 'UX focuses on overall user experience (research, flows, usability). UI focuses on visual design (colors, typography, components). Both work together for great products.',
+             'tips': 'Give examples: UX decides a checkout needs 3 steps; UI designs how each step looks.'},
+            {'question': 'Explain your design process.',
+             'answer': 'Typical process: Research → Define → Ideate → Prototype → Test → Iterate. Each phase has specific deliverables like personas, user flows, wireframes, and usability reports.',
+             'tips': 'Share a specific project example walking through your process.'},
+            {'question': 'How do you conduct user research?',
+             'answer': 'Methods include: interviews, surveys, usability testing, A/B testing, analytics review, card sorting, and contextual inquiry. Choice depends on goals, timeline, and resources.',
+             'tips': 'Discuss both qualitative and quantitative research importance.'},
+            {'question': 'What are design systems and why are they important?',
+             'answer': 'Design systems are collections of reusable components, guidelines, and principles. They ensure consistency, speed up development, and improve collaboration between design and dev teams.',
+             'tips': 'Reference examples like Material Design, Apple HIG, or your own work.'},
+            {'question': 'How do you handle accessibility in design?',
+             'answer': 'Follow WCAG guidelines: sufficient color contrast, keyboard navigation, screen reader support, clear focus states, alt text, and testing with assistive technologies.',
+             'tips': 'Mention specific tools like axe, Lighthouse, or VoiceOver for testing.'},
+        ]
+    }
+    
+    # Get questions for the field or return general questions
+    field_questions = questions_db.get(field, [
+        {'question': 'Tell me about yourself and your background.',
+         'answer': 'Structure: Present (current role/skills) → Past (relevant experience) → Future (career goals aligned with position). Keep it 2-3 minutes.',
+         'tips': 'Tailor to the job; focus on relevant achievements.'},
+        {'question': 'What are your greatest strengths?',
+         'answer': 'Choose 2-3 strengths relevant to the role. Provide specific examples demonstrating each strength with measurable results.',
+         'tips': 'Use the STAR method (Situation, Task, Action, Result).'},
+        {'question': 'Where do you see yourself in 5 years?',
+         'answer': 'Show ambition aligned with the company\'s growth. Express desire to develop skills, take on responsibilities, and contribute to team success.',
+         'tips': 'Research company\'s career paths before answering.'},
+    ])
+    
+    return field_questions[:5]
+
+
+###### Job Recommendations Generator ######
+def generate_job_recommendations(field, level, skills):
+    """Generate job recommendations based on field and experience level"""
+    
+    jobs_db = {
+        'Data Science': [
+            {'title': 'Data Scientist', 'level': 'Mid-Senior', 'salary': '₹12 - ₹25 LPA',
+             'skills': ['Python', 'Machine Learning', 'SQL', 'Statistics', 'TensorFlow'],
+             'description': 'Analyze complex data sets to drive business decisions and build predictive models.'},
+            {'title': 'Machine Learning Engineer', 'level': 'Mid-Senior', 'salary': '₹15 - ₹30 LPA',
+             'skills': ['Python', 'TensorFlow', 'PyTorch', 'MLOps', 'Cloud'],
+             'description': 'Design and deploy ML models at scale in production environments.'},
+            {'title': 'Data Analyst', 'level': 'Fresher-Entry', 'salary': '₹4 - ₹8 LPA',
+             'skills': ['SQL', 'Excel', 'Tableau', 'Python', 'Statistics'],
+             'description': 'Transform data into actionable insights through analysis and visualization.'},
+            {'title': 'Junior Data Scientist', 'level': 'Fresher', 'salary': '₹5 - ₹12 LPA',
+             'skills': ['Python', 'SQL', 'Statistics', 'Pandas', 'Machine Learning'],
+             'description': 'Assist in building ML models and performing data analysis under senior guidance.'},
+        ],
+        'Web Development': [
+            {'title': 'Frontend Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+             'skills': ['React', 'JavaScript', 'HTML', 'CSS', 'TypeScript'],
+             'description': 'Build responsive and interactive user interfaces for web applications.'},
+            {'title': 'Full Stack Developer', 'level': 'Mid-Senior', 'salary': '₹8 - ₹20 LPA',
+             'skills': ['React', 'Node.js', 'Python', 'SQL', 'AWS'],
+             'description': 'Develop both frontend and backend components of web applications.'},
+            {'title': 'Backend Developer', 'level': 'Entry-Mid', 'salary': '₹5 - ₹15 LPA',
+             'skills': ['Node.js', 'Python', 'SQL', 'APIs', 'Docker'],
+             'description': 'Design and implement server-side logic and database architecture.'},
+            {'title': 'Junior Web Developer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+             'skills': ['HTML', 'CSS', 'JavaScript', 'React', 'Git'],
+             'description': 'Develop and maintain websites under guidance of senior developers.'},
+        ],
+        'Android Development': [
+            {'title': 'Android Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+             'skills': ['Kotlin', 'Android SDK', 'Jetpack', 'REST APIs', 'Git'],
+             'description': 'Build native Android applications with modern architecture patterns.'},
+            {'title': 'Mobile App Developer', 'level': 'Mid-Senior', 'salary': '₹8 - ₹18 LPA',
+             'skills': ['Flutter', 'Kotlin', 'Swift', 'Firebase', 'REST APIs'],
+             'description': 'Develop cross-platform mobile applications for Android and iOS.'},
+            {'title': 'Junior Android Developer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+             'skills': ['Java', 'Kotlin', 'Android SDK', 'XML', 'Git'],
+             'description': 'Develop and maintain Android apps under senior developer guidance.'},
+            {'title': 'Flutter Developer', 'level': 'Entry-Mid', 'salary': '₹4 - ₹12 LPA',
+             'skills': ['Flutter', 'Dart', 'Firebase', 'REST APIs', 'Git'],
+             'description': 'Build cross-platform mobile apps using Flutter framework.'},
+        ],
+        'IOS Development': [
+            {'title': 'iOS Developer', 'level': 'Fresher-Entry', 'salary': '₹3.5 - ₹10 LPA',
+             'skills': ['Swift', 'UIKit', 'SwiftUI', 'Core Data', 'REST APIs'],
+             'description': 'Build native iOS applications for iPhone and iPad.'},
+            {'title': 'Senior iOS Engineer', 'level': 'Senior', 'salary': '₹15 - ₹30 LPA',
+             'skills': ['Swift', 'Architecture', 'Performance', 'Testing', 'Leadership'],
+             'description': 'Lead iOS development and mentor junior developers.'},
+            {'title': 'Junior iOS Developer', 'level': 'Fresher', 'salary': '₹3 - ₹7 LPA',
+             'skills': ['Swift', 'UIKit', 'Xcode', 'Git', 'REST APIs'],
+             'description': 'Develop iOS apps and learn best practices under senior guidance.'},
+            {'title': 'React Native Developer', 'level': 'Entry-Mid', 'salary': '₹4 - ₹12 LPA',
+             'skills': ['React Native', 'JavaScript', 'iOS', 'Android', 'Redux'],
+             'description': 'Build cross-platform mobile apps using React Native.'},
+        ],
+        'UI-UX Development': [
+            {'title': 'UI/UX Designer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+             'skills': ['Figma', 'Adobe XD', 'Prototyping', 'User Research', 'Wireframing'],
+             'description': 'Design intuitive and visually appealing user interfaces.'},
+            {'title': 'Product Designer', 'level': 'Mid-Senior', 'salary': '₹10 - ₹22 LPA',
+             'skills': ['Figma', 'User Research', 'Design Systems', 'Prototyping', 'Strategy'],
+             'description': 'Lead end-to-end product design from research to implementation.'},
+            {'title': 'Junior UI Designer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+             'skills': ['Figma', 'Adobe XD', 'Photoshop', 'Wireframing', 'Visual Design'],
+             'description': 'Create visual designs and UI components under senior guidance.'},
+            {'title': 'UX Researcher', 'level': 'Entry-Mid', 'salary': '₹5 - ₹15 LPA',
+             'skills': ['User Research', 'Usability Testing', 'Data Analysis', 'Interviewing', 'Surveys'],
+             'description': 'Conduct user research to inform product decisions.'},
+        ]
+    }
+    
+    return jobs_db.get(field, [
+        {'title': 'Software Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+         'skills': ['Programming', 'Problem Solving', 'Git', 'Agile', 'Communication'],
+         'description': 'Develop software solutions to meet business requirements.'},
+        {'title': 'Junior Software Engineer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+         'skills': ['Programming', 'Data Structures', 'Git', 'Problem Solving', 'Communication'],
+         'description': 'Write and maintain code under guidance of senior engineers.'},
+    ])
+
+
 ###### Main function run() ######
 
 def run():
@@ -560,36 +755,105 @@ def show_dashboard():
                         name = line
                         break
                 
-                # Extract skills using comprehensive keyword matching
-                skills_keywords = [
+                # Extract skills using regex with variations for better matching
+                # Each tuple: (display_name, [regex_patterns])
+                skills_patterns = {
                     # Programming Languages
-                    'python', 'java', 'javascript', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift', 'kotlin',
-                    'typescript', 'scala', 'r', 'matlab', 'perl', 'objective-c',
+                    'Python': [r'\bpython\b'],
+                    'Java': [r'\bjava\b(?!script)'],
+                    'JavaScript': [r'\bjavascript\b', r'\bjs\b', r'\bnode\.?js\b', r'\breact\.?js\b', r'\bvue\.?js\b', r'\bnext\.?js\b', r'\bnuxt\.?js\b', r'\bangular\.?js\b'],
+                    'C++': [r'\bc\+\+\b', r'\bcpp\b'],
+                    'C#': [r'\bc#\b', r'\bcsharp\b', r'\bc sharp\b'],
+                    'PHP': [r'\bphp\b'],
+                    'Ruby': [r'\bruby\b'],
+                    'Go': [r'\bgolang\b', r'\bgo\s+lang\b'],
+                    'Rust': [r'\brust\b'],
+                    'Swift': [r'\bswift\b'],
+                    'Kotlin': [r'\bkotlin\b'],
+                    'TypeScript': [r'\btypescript\b', r'\bts\b'],
+                    'Scala': [r'\bscala\b'],
+                    'R': [r'\br\s+programming\b', r'\br\s+language\b'],
+                    'MATLAB': [r'\bmatlab\b'],
                     # Web Technologies
-                    'html', 'css', 'react', 'angular', 'vue', 'node', 'django', 'flask', 'spring', 'express',
-                    'jquery', 'bootstrap', 'tailwind', 'sass', 'webpack', 'next.js', 'nuxt',
+                    'HTML': [r'\bhtml\b', r'\bhtml5\b'],
+                    'CSS': [r'\bcss\b', r'\bcss3\b', r'\bsass\b', r'\bscss\b', r'\bless\b'],
+                    'React': [r'\breact\b', r'\breact\.?js\b', r'\breactjs\b'],
+                    'Angular': [r'\bangular\b', r'\bangular\.?js\b', r'\bangularjs\b'],
+                    'Vue': [r'\bvue\b', r'\bvue\.?js\b', r'\bvuejs\b'],
+                    'Node.js': [r'\bnode\b', r'\bnode\.?js\b', r'\bnodejs\b'],
+                    'Django': [r'\bdjango\b'],
+                    'Flask': [r'\bflask\b'],
+                    'Spring': [r'\bspring\b', r'\bspring\s*boot\b'],
+                    'Express': [r'\bexpress\b', r'\bexpress\.?js\b'],
+                    'jQuery': [r'\bjquery\b'],
+                    'Bootstrap': [r'\bbootstrap\b'],
+                    'Tailwind': [r'\btailwind\b', r'\btailwindcss\b'],
+                    'Next.js': [r'\bnext\b', r'\bnext\.?js\b', r'\bnextjs\b'],
+                    'Webpack': [r'\bwebpack\b'],
                     # Mobile
-                    'android', 'ios', 'flutter', 'react native', 'xamarin', 'ionic',
+                    'Android': [r'\bandroid\b'],
+                    'iOS': [r'\bios\b', r'\biphone\b', r'\bipad\b'],
+                    'Flutter': [r'\bflutter\b'],
+                    'React Native': [r'\breact\s*native\b'],
+                    'Xamarin': [r'\bxamarin\b'],
                     # Databases
-                    'sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'oracle', 'sqlite', 'cassandra',
-                    'dynamodb', 'firebase', 'elasticsearch',
+                    'SQL': [r'\bsql\b', r'\bplsql\b', r'\bpl/sql\b'],
+                    'MySQL': [r'\bmysql\b'],
+                    'PostgreSQL': [r'\bpostgres\b', r'\bpostgresql\b', r'\bpsql\b'],
+                    'MongoDB': [r'\bmongo\b', r'\bmongodb\b'],
+                    'Redis': [r'\bredis\b'],
+                    'Oracle': [r'\boracle\b'],
+                    'SQLite': [r'\bsqlite\b'],
+                    'Firebase': [r'\bfirebase\b'],
+                    'Elasticsearch': [r'\belastic\b', r'\belasticsearch\b'],
                     # Cloud & DevOps
-                    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'jenkins', 'git', 'ci/cd', 'terraform',
-                    'ansible', 'linux', 'unix', 'nginx', 'apache',
+                    'AWS': [r'\baws\b', r'\bamazon\s*web\s*services\b', r'\bec2\b', r'\bs3\b', r'\blambda\b'],
+                    'Azure': [r'\bazure\b', r'\bmicrosoft\s*azure\b'],
+                    'GCP': [r'\bgcp\b', r'\bgoogle\s*cloud\b'],
+                    'Docker': [r'\bdocker\b'],
+                    'Kubernetes': [r'\bkubernetes\b', r'\bk8s\b'],
+                    'Jenkins': [r'\bjenkins\b'],
+                    'Git': [r'\bgit\b', r'\bgithub\b', r'\bgitlab\b'],
+                    'CI/CD': [r'\bci/cd\b', r'\bcicd\b', r'\bcontinuous\s*integration\b'],
+                    'Terraform': [r'\bterraform\b'],
+                    'Linux': [r'\blinux\b', r'\bubuntu\b', r'\bcentos\b', r'\bdebian\b'],
                     # Data Science & ML
-                    'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'keras', 'scikit-learn',
-                    'pandas', 'numpy', 'matplotlib', 'data analysis', 'data visualization', 'tableau',
-                    'power bi', 'excel', 'statistics', 'nlp', 'computer vision',
+                    'Machine Learning': [r'\bmachine\s*learning\b', r'\bml\b'],
+                    'Deep Learning': [r'\bdeep\s*learning\b', r'\bdl\b', r'\bneural\s*network\b'],
+                    'TensorFlow': [r'\btensorflow\b', r'\btf\b'],
+                    'PyTorch': [r'\bpytorch\b', r'\btorch\b'],
+                    'Keras': [r'\bkeras\b'],
+                    'Scikit-learn': [r'\bscikit\b', r'\bsklearn\b', r'\bscikit-learn\b'],
+                    'Pandas': [r'\bpandas\b'],
+                    'NumPy': [r'\bnumpy\b'],
+                    'Matplotlib': [r'\bmatplotlib\b'],
+                    'Data Analysis': [r'\bdata\s*analysis\b', r'\bdata\s*analyst\b'],
+                    'Data Visualization': [r'\bdata\s*visualization\b', r'\bdata\s*viz\b'],
+                    'Tableau': [r'\btableau\b'],
+                    'Power BI': [r'\bpower\s*bi\b', r'\bpowerbi\b'],
+                    'Excel': [r'\bexcel\b', r'\bms\s*excel\b'],
+                    'NLP': [r'\bnlp\b', r'\bnatural\s*language\b'],
+                    'Computer Vision': [r'\bcomputer\s*vision\b', r'\bcv\b', r'\bopencv\b'],
                     # Other
-                    'agile', 'scrum', 'rest api', 'graphql', 'microservices', 'testing', 'selenium',
-                    'api', 'ui/ux', 'figma', 'adobe xd', 'photoshop', 'illustrator'
-                ]
+                    'Agile': [r'\bagile\b'],
+                    'Scrum': [r'\bscrum\b'],
+                    'REST API': [r'\brest\b', r'\brest\s*api\b', r'\brestful\b'],
+                    'GraphQL': [r'\bgraphql\b'],
+                    'Microservices': [r'\bmicroservice\b', r'\bmicroservices\b'],
+                    'Selenium': [r'\bselenium\b'],
+                    'Figma': [r'\bfigma\b'],
+                    'Adobe XD': [r'\badobe\s*xd\b', r'\bxd\b'],
+                    'Photoshop': [r'\bphotoshop\b'],
+                    'Illustrator': [r'\billustrator\b'],
+                }
                 
                 detected_skills = []
                 resume_lower = resume_text.lower()
-                for skill in skills_keywords:
-                    if skill.lower() in resume_lower:
-                        detected_skills.append(skill.title())
+                for skill_name, patterns in skills_patterns.items():
+                    for pattern in patterns:
+                        if re.search(pattern, resume_lower, re.IGNORECASE):
+                            detected_skills.append(skill_name)
+                            break  # Found this skill, move to next
                 
                 # Remove duplicates and sort
                 detected_skills = sorted(list(set(detected_skills)))
@@ -731,12 +995,12 @@ def show_dashboard():
 
 
                 ## Skills Analyzing and Recommendation
-                st.subheader("**Skills Recommendation **")
+                st.subheader("**Skills Analysis & Recommendations **")
                 
                 ### Current Analyzed Skills
                 current_skills = resume_data.get('skills') or []
                 keywords = st_tags(label='### Your Current Skills',
-                text='See our skills recommendation below',value=current_skills,key = '1  ')
+                text='See our skills recommendation and gap analysis below',value=current_skills,key = '1  ')
 
                 ### Keywords for Recommendations
                 ds_keyword = ['tensorflow','keras','pytorch','machine learning','deep Learning','flask','streamlit']
@@ -753,15 +1017,70 @@ def show_dashboard():
                 ### condition starts to check skills from keywords and predict field
                 for i in current_skills:
                 
+                    # Helper function to normalize skill names for comparison
+                    def normalize_skill(skill):
+                        """Normalize skill name for comparison"""
+                        s = skill.lower().strip()
+                        # Remove common suffixes/variations
+                        s = s.replace('.js', '').replace('js', '').replace('.', '').strip()
+                        # Common mappings
+                        mappings = {
+                            'react': ['react', 'reactjs', 'react js'],
+                            'node': ['node', 'nodejs', 'node js'],
+                            'angular': ['angular', 'angularjs', 'angular js'],
+                            'vue': ['vue', 'vuejs', 'vue js'],
+                            'javascript': ['javascript', 'js'],
+                            'typescript': ['typescript', 'ts'],
+                            'c#': ['c#', 'csharp', 'c sharp'],
+                        }
+                        for key, variants in mappings.items():
+                            if s in variants or any(v in s for v in variants):
+                                return key
+                        return s
+                    
+                    def skills_match(user_skills, recommended):
+                        """Check if user has the recommended skill (with normalization)"""
+                        user_normalized = [normalize_skill(s) for s in user_skills]
+                        rec_normalized = normalize_skill(recommended)
+                        return rec_normalized in user_normalized or any(rec_normalized in u for u in user_normalized)
+                    
                     #### Data science recommendation
                     if i.lower() in ds_keyword:
                         print(i.lower())
                         reco_field = 'Data Science'
                         st.success("** Our analysis says you are looking for Data Science Jobs.**")
-                        recommended_skills = ['Data Visualization','Predictive Analysis','Statistical Modeling','Data Mining','Clustering & Classification','Data Analytics','Quantitative Analysis','Web Scraping','ML Algorithms','Keras','Pytorch','Probability','Scikit-learn','Tensorflow',"Flask",'Streamlit']
+                        recommended_skills = ['Data Visualization','Predictive Analysis','Statistical Modeling','Data Mining','Clustering & Classification','Data Analytics','Quantitative Analysis','Web Scraping','ML Algorithms','Keras','PyTorch','Probability','Scikit-learn','TensorFlow','Flask','Streamlit']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '2')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        # Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("**🎯 Skill Gap Analysis**")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"✅ {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"📚 {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
                         # course recommendation
                         rec_course = course_recommender(ds_course)
                         break
@@ -771,10 +1090,38 @@ def show_dashboard():
                         print(i.lower())
                         reco_field = 'Web Development'
                         st.success("** Our analysis says you are looking for Web Development Jobs **")
-                        recommended_skills = ['React','Django','Node JS','React JS','php','laravel','Magento','wordpress','Javascript','Angular JS','c#','Flask','SDK']
+                        recommended_skills = ['React','Django','Node.js','PHP','Laravel','Magento','WordPress','JavaScript','Angular','Vue','C#','Flask','Express']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '3')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        # Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("**🎯 Skill Gap Analysis**")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"✅ {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"📚 {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
                         # course recommendation
                         rec_course = course_recommender(web_course)
                         break
@@ -784,10 +1131,38 @@ def show_dashboard():
                         print(i.lower())
                         reco_field = 'Android Development'
                         st.success("** Our analysis says you are looking for Android App Development Jobs **")
-                        recommended_skills = ['Android','Android development','Flutter','Kotlin','XML','Java','Kivy','GIT','SDK','SQLite']
+                        recommended_skills = ['Android','Flutter','Kotlin','XML','Java','Kivy','Git','SDK','SQLite','Firebase']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '4')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        # Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("**🎯 Skill Gap Analysis**")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"✅ {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"📚 {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
                         # course recommendation
                         rec_course = course_recommender(android_course)
                         break
@@ -797,10 +1172,38 @@ def show_dashboard():
                         print(i.lower())
                         reco_field = 'IOS Development'
                         st.success("** Our analysis says you are looking for IOS App Development Jobs **")
-                        recommended_skills = ['IOS','IOS Development','Swift','Cocoa','Cocoa Touch','Xcode','Objective-C','SQLite','Plist','StoreKit',"UI-Kit",'AV Foundation','Auto-Layout']
+                        recommended_skills = ['iOS','Swift','Cocoa','Cocoa Touch','Xcode','Objective-C','SQLite','SwiftUI','UIKit','Core Data']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '5')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        # Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("**🎯 Skill Gap Analysis**")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"✅ {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"📚 {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
                         # course recommendation
                         rec_course = course_recommender(ios_course)
                         break
@@ -810,10 +1213,38 @@ def show_dashboard():
                         print(i.lower())
                         reco_field = 'UI-UX Development'
                         st.success("** Our analysis says you are looking for UI-UX Development Jobs **")
-                        recommended_skills = ['UI','User Experience','Adobe XD','Figma','Zeplin','Balsamiq','Prototyping','Wireframes','Storyframes','Adobe Photoshop','Editing','Illustrator','After Effects','Premier Pro','Indesign','Wireframe','Solid','Grasp','User Research']
+                        recommended_skills = ['UI Design','User Experience','Adobe XD','Figma','Sketch','Prototyping','Wireframes','Adobe Photoshop','Illustrator','After Effects','InDesign','User Research','Usability Testing']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '6')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        # Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("**🎯 Skill Gap Analysis**")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"✅ {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"📚 {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
                         # course recommendation
                         rec_course = course_recommender(uiux_course)
                         break
@@ -835,136 +1266,143 @@ def show_dashboard():
                 ## Resume Scorer & Resume Writing Tips
                 st.subheader("**Resume Tips & Ideas **")
                 resume_score = 0
+                resume_lower = resume_text.lower()  # Convert to lowercase for case-insensitive matching
                 
                 ### Predicting Whether these key points are added to the resume
-                if 'Objective' or 'Summary' in resume_text:
-                    resume_score = resume_score+6
+                if re.search(r'\b(objective|summary|profile|about\s*me)\b', resume_lower):
+                    resume_score = resume_score + 6
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Objective/Summary</h4>''',unsafe_allow_html=True)                
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add your career objective, it will give your career intension to the Recruiters.</h4>''',unsafe_allow_html=True)
 
-                if 'Education' or 'School' or 'College'  in resume_text:
+                if re.search(r'\b(education|school|college|university|degree|bachelor|master|b\.?tech|m\.?tech)\b', resume_lower):
                     resume_score = resume_score + 12
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Education Details</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Education. It will give Your Qualification level to the recruiter</h4>''',unsafe_allow_html=True)
 
-                if 'EXPERIENCE' in resume_text:
-                    resume_score = resume_score + 16
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Experience</h4>''',unsafe_allow_html=True)
-                elif 'Experience' in resume_text:
+                if re.search(r'\b(experience|work\s*experience|employment|work\s*history)\b', resume_lower):
                     resume_score = resume_score + 16
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Experience</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Experience. It will help you to stand out from crowd</h4>''',unsafe_allow_html=True)
 
-                if 'INTERNSHIPS'  in resume_text:
-                    resume_score = resume_score + 6
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Internships</h4>''',unsafe_allow_html=True)
-                elif 'INTERNSHIP'  in resume_text:
-                    resume_score = resume_score + 6
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Internships</h4>''',unsafe_allow_html=True)
-                elif 'Internships'  in resume_text:
-                    resume_score = resume_score + 6
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Internships</h4>''',unsafe_allow_html=True)
-                elif 'Internship'  in resume_text:
+                if re.search(r'\b(internship|internships|intern)\b', resume_lower):
                     resume_score = resume_score + 6
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Internships</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Internships. It will help you to stand out from crowd</h4>''',unsafe_allow_html=True)
 
-                if 'SKILLS'  in resume_text:
-                    resume_score = resume_score + 7
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Skills</h4>''',unsafe_allow_html=True)
-                elif 'SKILL'  in resume_text:
-                    resume_score = resume_score + 7
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Skills</h4>''',unsafe_allow_html=True)
-                elif 'Skills'  in resume_text:
-                    resume_score = resume_score + 7
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Skills</h4>''',unsafe_allow_html=True)
-                elif 'Skill'  in resume_text:
+                if re.search(r'\b(skills|skill|technical\s*skills|core\s*competencies)\b', resume_lower):
                     resume_score = resume_score + 7
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Skills</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Skills. It will help you a lot</h4>''',unsafe_allow_html=True)
 
-                if 'HOBBIES' in resume_text:
-                    resume_score = resume_score + 4
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Hobbies</h4>''',unsafe_allow_html=True)
-                elif 'Hobbies' in resume_text:
+                if re.search(r'\b(hobbies|hobby)\b', resume_lower):
                     resume_score = resume_score + 4
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Hobbies</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Hobbies. It will show your personality to the Recruiters and give the assurance that you are fit for this role or not.</h4>''',unsafe_allow_html=True)
 
-                if 'INTERESTS'in resume_text:
-                    resume_score = resume_score + 5
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Interest</h4>''',unsafe_allow_html=True)
-                elif 'Interests'in resume_text:
+                if re.search(r'\b(interests|interest)\b', resume_lower):
                     resume_score = resume_score + 5
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Interest</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Interest. It will show your interest other that job.</h4>''',unsafe_allow_html=True)
 
-                if 'ACHIEVEMENTS' in resume_text:
-                    resume_score = resume_score + 13
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Achievements </h4>''',unsafe_allow_html=True)
-                elif 'Achievements' in resume_text:
+                if re.search(r'\b(achievements|achievement|accomplishments|awards)\b', resume_lower):
                     resume_score = resume_score + 13
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Achievements </h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Achievements. It will show that you are capable for the required position.</h4>''',unsafe_allow_html=True)
 
-                if 'CERTIFICATIONS' in resume_text:
-                    resume_score = resume_score + 12
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Certifications </h4>''',unsafe_allow_html=True)
-                elif 'Certifications' in resume_text:
-                    resume_score = resume_score + 12
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Certifications </h4>''',unsafe_allow_html=True)
-                elif 'Certification' in resume_text:
+                if re.search(r'\b(certifications|certification|certified|certificate)\b', resume_lower):
                     resume_score = resume_score + 12
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Certifications </h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Certifications. It will show that you have done some specialization for the required position.</h4>''',unsafe_allow_html=True)
 
-                if 'PROJECTS' in resume_text:
-                    resume_score = resume_score + 19
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects</h4>''',unsafe_allow_html=True)
-                elif 'PROJECT' in resume_text:
-                    resume_score = resume_score + 19
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects</h4>''',unsafe_allow_html=True)
-                elif 'Projects' in resume_text:
-                    resume_score = resume_score + 19
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects</h4>''',unsafe_allow_html=True)
-                elif 'Project' in resume_text:
+                if re.search(r'\b(projects|project|portfolio)\b', resume_lower):
                     resume_score = resume_score + 19
                     st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects</h4>''',unsafe_allow_html=True)
                 else:
                     st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Projects. It will show that you have done work related the required position or not.</h4>''',unsafe_allow_html=True)
 
-                st.subheader("**Resume Score **")
+                ## Enhanced Resume Score Section with detailed breakdown
+                st.subheader("**Resume Score Analysis **")
                 
-                st.markdown(
-                    """
-                    <style>
-                        .stProgress > div > div > div > div {
-                            background-color: #d73b5c;
-                        }
-                    </style>""",
-                    unsafe_allow_html=True,
-                )
-
-                ### Score Bar
-                my_bar = st.progress(0)
-                score = 0
-                for percent_complete in range(resume_score):
-                    score +=1
-                    time.sleep(0.1)
-                    my_bar.progress(percent_complete + 1)
-
-                ### Score
-                st.success('** Your Resume Writing Score: ' + str(score)+'**')
-                st.warning("** Note: This score is calculated based on the content that you have in your Resume. **")
+                # Max possible score from sections: 6+12+16+6+7+4+5+13+12+19 = 100
+                # Cap resume_score at 100
+                resume_score = min(resume_score, 100)
+                
+                # Calculate overall score percentage
+                max_score = 100
+                score_percentage = (resume_score / max_score) * 100
+                
+                # Display score with gauge-like visualization
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    st.markdown(
+                        """
+                        <style>
+                            .stProgress > div > div > div > div {
+                                background-color: #1ed760;
+                            }
+                        </style>""",
+                        unsafe_allow_html=True,
+                    )
+                    
+                    ### Score Bar
+                    my_bar = st.progress(0)
+                    score = 0
+                    for percent_complete in range(int(score_percentage)):
+                        score +=1
+                        time.sleep(0.01)
+                        my_bar.progress(percent_complete + 1)
+                    
+                    # Display score with color coding
+                    if score_percentage >= 80:
+                        score_color = "#1ed760"
+                        score_label = "Excellent"
+                    elif score_percentage >= 60:
+                        score_color = "#fba171"
+                        score_label = "Good"
+                    elif score_percentage >= 40:
+                        score_color = "#ffcc00"
+                        score_label = "Average"
+                    else:
+                        score_color = "#d73b5c"
+                        score_label = "Needs Improvement"
+                    
+                    st.markdown(f'''<h1 style='text-align: center; color: {score_color};'>{int(score_percentage)}%</h1>''', unsafe_allow_html=True)
+                    st.markdown(f'''<h3 style='text-align: center; color: {score_color};'>{score_label}</h3>''', unsafe_allow_html=True)
+                
+                # Detailed score breakdown
+                with st.expander("📊 View Detailed Score Breakdown"):
+                    breakdown_data = {
+                        'Section': ['Objective/Summary', 'Education', 'Experience', 'Internships', 'Skills Section', 
+                                   'Hobbies', 'Interests', 'Achievements', 'Certifications', 'Projects'],
+                        'Points Earned': [
+                            6 if re.search(r'\b(objective|summary|profile|about\s*me)\b', resume_lower) else 0,
+                            12 if re.search(r'\b(education|school|college|university|degree|bachelor|master|b\.?tech|m\.?tech)\b', resume_lower) else 0,
+                            16 if re.search(r'\b(experience|work\s*experience|employment|work\s*history)\b', resume_lower) else 0,
+                            6 if re.search(r'\b(internship|internships|intern)\b', resume_lower) else 0,
+                            7 if re.search(r'\b(skills|skill|technical\s*skills|core\s*competencies)\b', resume_lower) else 0,
+                            4 if re.search(r'\b(hobbies|hobby)\b', resume_lower) else 0,
+                            5 if re.search(r'\b(interests|interest)\b', resume_lower) else 0,
+                            13 if re.search(r'\b(achievements|achievement|accomplishments|awards)\b', resume_lower) else 0,
+                            12 if re.search(r'\b(certifications|certification|certified|certificate)\b', resume_lower) else 0,
+                            19 if re.search(r'\b(projects|project|portfolio)\b', resume_lower) else 0,
+                        ],
+                        'Max Points': [6, 12, 16, 6, 7, 4, 5, 13, 12, 19]
+                    }
+                    breakdown_df = pd.DataFrame(breakdown_data)
+                    breakdown_df['Status'] = breakdown_df.apply(lambda x: '✅' if x['Points Earned'] > 0 else '❌', axis=1)
+                    st.dataframe(breakdown_df, use_container_width=True)
+                    st.info(f"**Total Score: {int(resume_score)}/100** ({int(score_percentage)}%)")
+                
+                st.warning("** Note: This score is calculated based on the content and completeness of your Resume. **")
 
                 # print(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data['name'], resume_data['email'], str(resume_score), timestamp, str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']), str(recommended_skills), str(rec_course), pdf_name)
 
@@ -978,6 +1416,42 @@ def show_dashboard():
 
                 ## Calling insert_data to add all the data into user_data                
                 insert_data(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data.get('name') or 'Unknown', resume_data.get('email') or 'Unknown', str(resume_score), timestamp, str(resume_data.get('no_of_pages') or 0), reco_field, cand_level, str(current_skills), str(recommended_skills), str(rec_course), pdf_name)
+
+                ## AI-Powered Interview Questions
+                st.header("**🤖 AI-Powered Interview Preparation**")
+                st.markdown(f"Get ready for your {reco_field} interview with these personalized questions!")
+                
+                # Generate interview questions based on field and experience level
+                interview_questions = generate_interview_questions(reco_field, cand_level, current_skills)
+                
+                if interview_questions:
+                    for idx, qa in enumerate(interview_questions, 1):
+                        with st.expander(f"Question {idx}: {qa['question']}"):
+                            st.markdown("**💡 Suggested Answer:**")
+                            st.write(qa['answer'])
+                            if 'tips' in qa:
+                                st.markdown("**📌 Tips:**")
+                                st.info(qa['tips'])
+                
+                ## Job Recommendations
+                st.header("**💼 Job Recommendations**")
+                st.markdown("Based on your skills and experience, here are some job roles you might be interested in:")
+                
+                job_recommendations = generate_job_recommendations(reco_field, cand_level, current_skills)
+                
+                if job_recommendations:
+                    cols = st.columns(2)
+                    for idx, job in enumerate(job_recommendations):
+                        with cols[idx % 2]:
+                            st.markdown(f"""
+                            <div style='padding: 20px; background-color: #f0f2f6; border-radius: 10px; margin-bottom: 10px; color: #000000;'>
+                                <h3 style='color: #1e3a8a; margin-bottom: 10px;'>{job['title']}</h3>
+                                <p style='color: #000000; margin: 5px 0;'><strong>Experience Level:</strong> {job['level']}</p>
+                                <p style='color: #000000; margin: 5px 0;'><strong>Key Skills:</strong> {', '.join(job['skills'][:5])}</p>
+                                <p style='color: #000000; margin: 5px 0;'><strong>Avg Salary:</strong> {job['salary']}</p>
+                                <p style='color: #333333; margin-top: 10px;'>{job['description']}</p>
+                            </div>
+                            """, unsafe_allow_html=True)
 
                 ## Recommending Resume Writing Video
                 st.header("**Bonus Video for Resume Writing Tips**")
