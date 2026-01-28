@@ -123,6 +123,7 @@ try:
     # For MongoDB Atlas, we need special SSL handling
     if 'mongodb+srv' in mongodb_uri or 'mongodb.net' in mongodb_uri:
         print("Connecting to MongoDB Atlas...")
+        import ssl
         client = MongoClient(
             mongodb_uri,
             serverSelectionTimeoutMS=5000,
@@ -130,7 +131,8 @@ try:
             socketTimeoutMS=5000,
             retryWrites=True,
             w='majority',
-            tlsAllowInvalidCertificates=False
+            tls=True,
+            tlsAllowInvalidCertificates=True  # Allow for development/testing
         )
     else:
         print("Connecting to local MongoDB...")

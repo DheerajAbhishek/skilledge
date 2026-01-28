@@ -1,8 +1,9 @@
 streamlit
 pandas
 plotly
-pymongo[srv]
+pymongo[srv]>=4.6.0
 dnspython
+certifi
 nltk
 pdfminer3
 pdfminer.six
