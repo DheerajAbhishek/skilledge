@@ -29,6 +29,138 @@ from Courses import ds_course,web_course,android_course,ios_course,uiux_course,r
 import nltk
 nltk.download('stopwords')
 
+# DuckDuckGo Search Integration
+try:
+    from duckduckgo_search import DDGS
+    DDGS_AVAILABLE = True
+except ImportError:
+    DDGS_AVAILABLE = False
+    print("DuckDuckGo search not available. Install with: pip install duckduckgo-search")
+
+
+###### DuckDuckGo Search Functions ######
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def search_live_jobs(job_title, location="India", max_results=5):
+    """Search for live job listings using DuckDuckGo"""
+    if not DDGS_AVAILABLE:
+        return []
+    
+    try:
+        with DDGS() as ddgs:
+            query = f"{job_title} jobs {location} fresher entry level"
+            results = list(ddgs.text(query, region='in-en', max_results=max_results))
+            
+            jobs = []
+            for r in results:
+                jobs.append({
+                    'title': r.get('title', ''),
+                    'link': r.get('href', ''),
+                    'snippet': r.get('body', '')[:150] + '...' if len(r.get('body', '')) > 150 else r.get('body', ''),
+                    'source': r.get('href', '').split('/')[2] if '/' in r.get('href', '') else 'Unknown'
+                })
+            return jobs
+    except Exception as e:
+        print(f"DuckDuckGo job search error: {e}")
+        return []
+
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def search_salary_info(job_title, location="India"):
+    """Search for salary information using DuckDuckGo"""
+    if not DDGS_AVAILABLE:
+        return None
+    
+    try:
+        with DDGS() as ddgs:
+            query = f"{job_title} salary India fresher 2024 2025 LPA"
+            results = list(ddgs.text(query, region='in-en', max_results=3))
+            
+            if results:
+                return {
+                    'info': results[0].get('body', 'Salary information not available'),
+                    'source': results[0].get('href', '')
+                }
+        return None
+    except Exception as e:
+        print(f"DuckDuckGo salary search error: {e}")
+        return None
+
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour  
+def search_trending_skills(field, year="2026"):
+    """Search for trending skills in a field using DuckDuckGo"""
+    if not DDGS_AVAILABLE:
+        return []
+    
+    try:
+        with DDGS() as ddgs:
+            query = f"most in-demand {field} skills {year} India hiring"
+            results = list(ddgs.text(query, region='in-en', max_results=3))
+            
+            skills_info = []
+            for r in results:
+                skills_info.append({
+                    'title': r.get('title', ''),
+                    'snippet': r.get('body', ''),
+                    'link': r.get('href', '')
+                })
+            return skills_info
+    except Exception as e:
+        print(f"DuckDuckGo skills search error: {e}")
+        return []
+
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def search_courses(skill, platform="free"):
+    """Search for courses related to a skill"""
+    if not DDGS_AVAILABLE:
+        return []
+    
+    try:
+        with DDGS() as ddgs:
+            query = f"best {platform} {skill} course online certification"
+            results = list(ddgs.text(query, region='in-en', max_results=4))
+            
+            courses = []
+            for r in results:
+                courses.append({
+                    'title': r.get('title', ''),
+                    'link': r.get('href', ''),
+                    'description': r.get('body', '')[:100] + '...'
+                })
+            return courses
+    except Exception as e:
+        print(f"DuckDuckGo course search error: {e}")
+        return []
+
+
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def search_interview_questions(job_title, skill=None):
+    """Search for interview questions for a specific role or skill"""
+    if not DDGS_AVAILABLE:
+        return []
+    
+    try:
+        with DDGS() as ddgs:
+            if skill:
+                query = f"{skill} interview questions answers freshers"
+            else:
+                query = f"{job_title} interview questions answers freshers India"
+            results = list(ddgs.text(query, region='in-en', max_results=3))
+            
+            questions = []
+            for r in results:
+                questions.append({
+                    'title': r.get('title', ''),
+                    'link': r.get('href', ''),
+                    'snippet': r.get('body', '')
+                })
+            return questions
+    except Exception as e:
+        print(f"DuckDuckGo interview search error: {e}")
+        return []
+
 
 ###### Preprocessing functions ######
 
@@ -240,13 +372,147 @@ def load_css():
         
         /* Horizontal Navigation Bar */
         .navbar {
-            background-color: #1e3a8a;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Score Card */
+        .score-card {
+            background: linear-gradient(135deg, #10b981 0%, #000 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .score-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        /* Skill Tags */
+        .skill-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .skill-tag-missing {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .skill-tag-trending {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        }
+        
+        /* Job Card */
+        .job-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border-left: 5px solid #3b82f6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .job-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .job-title {
+            color: #1e3a8a;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .job-platform-btn {
+            display: inline-block;
+            padding: 8px 16px;
             border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-naukri { background: #1a1a1a; color: white; }
+        .btn-linkedin { background: #1a1a1a; color: white; }
+        .btn-indeed { background: #1a1a1a; color: white; }
+        .btn-glassdoor { background: #1a1a1a; color: white; }
+        .btn-internshala { background: #1a1a1a; color: white; }
+        
+        .job-platform-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        
+        /* Interview Card */
+        .interview-card {
+            background: linear-gradient(145deg, #fefce8 0%, #fef3c7 100%);
+            border-radius: 16px;
+            padding: 24px;
+            border-left: 5px solid #f59e0b;
+            margin-bottom: 16px;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, transparent 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Trending Badge */
+        .trending-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
         .navbar-brand {
@@ -558,6 +824,142 @@ def generate_job_recommendations(field, level, skills):
          'skills': ['Programming', 'Data Structures', 'Git', 'Problem Solving', 'Communication'],
          'description': 'Write and maintain code under guidance of senior engineers.'},
     ])
+
+
+###### Trending Skills Generator ######
+def get_trending_skills(field):
+    """Get trending skills for 2026 based on field"""
+    
+    trending_db = {
+        'Data Science': {
+            'hot': ['Generative AI', 'LLMs', 'MLOps', 'LangChain', 'Vector Databases'],
+            'growing': ['AutoML', 'Feature Stores', 'Model Monitoring', 'Data Mesh', 'dbt'],
+            'essential': ['Python', 'SQL', 'TensorFlow', 'PyTorch', 'Pandas']
+        },
+        'Web Development': {
+            'hot': ['Next.js 14', 'Astro', 'Bun', 'tRPC', 'Edge Computing'],
+            'growing': ['Remix', 'SvelteKit', 'Turbopack', 'Server Components', 'WebAssembly'],
+            'essential': ['React', 'TypeScript', 'Node.js', 'Tailwind CSS', 'Git']
+        },
+        'Android Development': {
+            'hot': ['Jetpack Compose', 'Kotlin Multiplatform', 'Gemini AI', 'Compose Multiplatform'],
+            'growing': ['KMM', 'Ktor', 'Room', 'WorkManager', 'App Bundles'],
+            'essential': ['Kotlin', 'Android SDK', 'MVVM', 'Coroutines', 'Firebase']
+        },
+        'IOS Development': {
+            'hot': ['SwiftUI', 'Swift Concurrency', 'VisionOS', 'SwiftData', 'App Intents'],
+            'growing': ['Combine', 'TCA', 'SPM', 'WidgetKit', 'App Clips'],
+            'essential': ['Swift', 'UIKit', 'Core Data', 'Xcode', 'TestFlight']
+        },
+        'UI-UX Development': {
+            'hot': ['AI Design Tools', 'Figma Dev Mode', 'Design Systems', 'Motion Design', 'AR/VR UX'],
+            'growing': ['Design Tokens', 'Variable Fonts', 'Micro-interactions', '3D Design', 'Voice UI'],
+            'essential': ['Figma', 'User Research', 'Prototyping', 'Accessibility', 'Design Thinking']
+        }
+    }
+    
+    return trending_db.get(field, {
+        'hot': ['AI/ML Integration', 'Cloud Computing', 'DevOps', 'Cybersecurity'],
+        'growing': ['Microservices', 'Containers', 'API Design', 'CI/CD'],
+        'essential': ['Git', 'Problem Solving', 'Communication', 'Agile']
+    })
+
+
+###### Job Search URLs Generator ######
+def get_job_search_urls(job_title):
+    """Generate job search URLs for different platforms"""
+    import urllib.parse
+    encoded_title = urllib.parse.quote(job_title)
+    
+    return {
+        'naukri': f'https://www.naukri.com/{encoded_title.lower().replace("%20", "-")}-jobs',
+        'linkedin': f'https://www.linkedin.com/jobs/search/?keywords={encoded_title}',
+        'indeed': f'https://www.indeed.co.in/jobs?q={encoded_title}',
+        'glassdoor': f'https://www.glassdoor.co.in/Job/jobs.htm?sc.keyword={encoded_title}',
+        'internshala': f'https://internshala.com/jobs/{encoded_title.lower().replace("%20", "-")}-jobs'
+    }
+
+
+###### Resume-Based Interview Questions Generator ######
+def generate_resume_based_questions(skills, field, projects_text=""):
+    """Generate interview questions specifically based on resume skills"""
+    
+    skill_questions = {
+        'Python': [
+            {'q': 'Explain the difference between lists and tuples in Python.', 
+             'a': 'Lists are mutable (can be changed) and use square brackets []. Tuples are immutable (cannot be changed) and use parentheses (). Tuples are faster and used when data shouldn\'t change.'},
+            {'q': 'What are Python decorators and how do you use them?',
+             'a': 'Decorators are functions that modify other functions. They use @decorator syntax. Common uses: logging, timing, authentication. Example: @login_required before a function.'}
+        ],
+        'JavaScript': [
+            {'q': 'Explain the difference between let, const, and var.',
+             'a': 'var is function-scoped and hoisted. let is block-scoped, can be reassigned. const is block-scoped and cannot be reassigned (but objects/arrays can be mutated).'},
+            {'q': 'What is the event loop in JavaScript?',
+             'a': 'The event loop handles async operations. It checks the call stack, executes sync code first, then processes callback queue (setTimeout) and microtask queue (Promises) in order.'}
+        ],
+        'React': [
+            {'q': 'Explain the useState and useEffect hooks.',
+             'a': 'useState manages component state - returns [state, setState]. useEffect handles side effects (API calls, subscriptions) - runs after render. Dependencies array controls when it runs.'},
+            {'q': 'What is the Virtual DOM and how does React use it?',
+             'a': 'Virtual DOM is an in-memory representation of real DOM. React compares new vs old virtual DOM (diffing), then updates only changed parts of real DOM (reconciliation) for better performance.'}
+        ],
+        'Node.js': [
+            {'q': 'What is the difference between process.nextTick() and setImmediate()?',
+             'a': 'process.nextTick() executes immediately after current operation, before I/O events. setImmediate() executes in next iteration of event loop, after I/O events.'},
+            {'q': 'Explain middleware in Express.js.',
+             'a': 'Middleware are functions with access to req, res, next. They execute in order, can modify request/response, end the cycle, or call next(). Used for auth, logging, error handling.'}
+        ],
+        'SQL': [
+            {'q': 'Explain the difference between INNER JOIN, LEFT JOIN, and RIGHT JOIN.',
+             'a': 'INNER JOIN returns matching rows from both tables. LEFT JOIN returns all from left table + matches from right. RIGHT JOIN returns all from right table + matches from left.'},
+            {'q': 'What are indexes and when would you use them?',
+             'a': 'Indexes speed up data retrieval by creating a data structure for quick lookups. Use on frequently queried columns, WHERE clauses, JOIN columns. Avoid on frequently updated columns.'}
+        ],
+        'Machine Learning': [
+            {'q': 'Explain overfitting and how to prevent it.',
+             'a': 'Overfitting is when model learns training data too well but fails on new data. Prevention: more data, regularization (L1/L2), dropout, cross-validation, early stopping, simpler model.'},
+            {'q': 'What is the difference between precision and recall?',
+             'a': 'Precision = TP/(TP+FP) - of predicted positives, how many are correct. Recall = TP/(TP+FN) - of actual positives, how many were found. Use F1-score for balance.'}
+        ],
+        'Git': [
+            {'q': 'What is the difference between git merge and git rebase?',
+             'a': 'Merge creates a new commit combining branches, preserving history. Rebase moves commits to new base, creating linear history. Rebase rewrites history - don\'t use on public branches.'},
+            {'q': 'How do you resolve merge conflicts?',
+             'a': 'Open conflicted files, look for <<<<<<< markers, manually choose/combine changes, remove markers, stage resolved files with git add, then commit.'}
+        ],
+        'AWS': [
+            {'q': 'Explain the difference between EC2, Lambda, and ECS.',
+             'a': 'EC2: Virtual servers you manage. Lambda: Serverless functions, pay per execution. ECS: Container orchestration service. Choose based on control vs convenience needs.'},
+            {'q': 'What is the difference between S3 storage classes?',
+             'a': 'Standard: frequent access. Intelligent-Tiering: auto-moves data. Standard-IA: infrequent access. Glacier: archival (minutes-hours retrieval). Glacier Deep: long-term archive (12+ hours).'}
+        ],
+        'Docker': [
+            {'q': 'What is the difference between Docker image and container?',
+             'a': 'Image is a read-only template with instructions. Container is a running instance of an image. One image can create many containers. Images are built from Dockerfiles.'},
+            {'q': 'Explain Docker networking modes.',
+             'a': 'Bridge: default, isolated network. Host: shares host network. None: no networking. Overlay: multi-host communication. Macvlan: assigns MAC address, appears as physical device.'}
+        ]
+    }
+    
+    questions = []
+    for skill in skills:
+        skill_key = skill if skill in skill_questions else None
+        # Try to match partial skills
+        if not skill_key:
+            for key in skill_questions:
+                if key.lower() in skill.lower() or skill.lower() in key.lower():
+                    skill_key = key
+                    break
+        
+        if skill_key and skill_key in skill_questions:
+            for qa in skill_questions[skill_key]:
+                questions.append({
+                    'skill': skill,
+                    'question': qa['q'],
+                    'answer': qa['a']
+                })
+    
+    return questions[:8]  # Return top 8 questions
 
 
 ###### Main function run() ######
@@ -1041,6 +1443,9 @@ def show_dashboard():
                     def skills_match(user_skills, recommended):
                         """Check if user has the recommended skill (with normalization)"""
                         user_normalized = [normalize_skill(s) for s in user_skills]
+                        # Handle both single skill string and list of skills
+                        if isinstance(recommended, list):
+                            recommended = recommended[0] if recommended else ''
                         rec_normalized = normalize_skill(recommended)
                         return rec_normalized in user_normalized or any(rec_normalized in u for u in user_normalized)
                     
@@ -1406,6 +1811,130 @@ def show_dashboard():
 
                 # print(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data['name'], resume_data['email'], str(resume_score), timestamp, str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']), str(recommended_skills), str(rec_course), pdf_name)
 
+                ## ============ DASHBOARD OVERVIEW ============
+                st.header("**📊 Analysis Dashboard Overview**")
+                st.markdown("A comprehensive view of your resume analysis results:")
+                
+                # Dashboard metrics row
+                metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+                
+                with metric_col1:
+                    st.markdown(f"""
+                    <div class='score-card'>
+                        <div class='score-value' style='color: {score_color};'>{int(score_percentage)}%</div>
+                        <div class='score-label'>Resume Score</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with metric_col2:
+                    st.markdown(f"""
+                    <div class='score-card'>
+                        <div class='score-value' style='color: #2563eb;'>{len(current_skills)}</div>
+                        <div class='score-label'>Skills Found</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with metric_col3:
+                    matched_count = len([s for s in recommended_skills if skills_match(current_skills, s)])
+                    st.markdown(f"""
+                    <div class='score-card'>
+                        <div class='score-value' style='color: #059669;'>{matched_count}/{len(recommended_skills)}</div>
+                        <div class='score-label'>Skills Match</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with metric_col4:
+                    st.markdown(f"""
+                    <div class='score-card'>
+                        <div class='score-value' style='color: #0d9488;'>{cand_level}</div>
+                        <div class='score-label'>Experience Level</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                # Visual Analysis Charts
+                st.subheader("**📈 Visual Analytics**")
+                chart_col1, chart_col2 = st.columns(2)
+                
+                with chart_col1:
+                    # Skills Match Pie Chart
+                    skills_matched = len([s for s in recommended_skills if skills_match(current_skills, s)])
+                    skills_missing = len(recommended_skills) - skills_matched
+                    
+                    fig_skills = px.pie(
+                        values=[skills_matched, skills_missing],
+                        names=['Matched Skills', 'Missing Skills'],
+                        title='Skills Gap Analysis',
+                        color_discrete_sequence=['#10b981', '#ef4444'],
+                        hole=0.4
+                    )
+                    fig_skills.update_layout(
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white')
+                    )
+                    st.plotly_chart(fig_skills, use_container_width=True)
+                
+                with chart_col2:
+                    # Score Breakdown Bar Chart
+                    score_sections = {
+                        'Objective': 6 if re.search(r'\b(objective|summary|profile)\b', resume_lower) else 0,
+                        'Education': 12 if re.search(r'\b(education|school|college|university)\b', resume_lower) else 0,
+                        'Experience': 16 if re.search(r'\b(experience|work\s*experience)\b', resume_lower) else 0,
+                        'Skills': 7 if re.search(r'\b(skills|skill)\b', resume_lower) else 0,
+                        'Projects': 19 if re.search(r'\b(projects|project)\b', resume_lower) else 0,
+                        'Certifications': 12 if re.search(r'\b(certifications|certified)\b', resume_lower) else 0,
+                    }
+                    
+                    fig_bar = px.bar(
+                        x=list(score_sections.keys()),
+                        y=list(score_sections.values()),
+                        title='Section-wise Score',
+                        labels={'x': 'Section', 'y': 'Points'},
+                        color=list(score_sections.values()),
+                        color_continuous_scale='greens'
+                    )
+                    fig_bar.update_layout(
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white'),
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig_bar, use_container_width=True)
+                
+                # Quick Summary Cards
+                st.subheader("**📋 Quick Summary**")
+                summary_col1, summary_col2 = st.columns(2)
+                
+                with summary_col1:
+                    st.markdown(f"""
+                    <div class='dashboard-card'>
+                        <h4 style='color: #000000;'>Profile Summary</h4>
+                        <ul style='color: #000000; list-style: none; padding: 0;'>
+                            <li><strong>Name:</strong> {resume_data.get('name') or 'Not Found'}</li>
+                            <li><strong>Email:</strong> {resume_data.get('email') or 'Not Found'}</li>
+                            <li><strong>Pages:</strong> {resume_data.get('no_of_pages') or 'N/A'}</li>
+                            <li><strong>Predicted Field:</strong> {reco_field}</li>
+                            <li><strong>Experience Level:</strong> {cand_level}</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with summary_col2:
+                    skills_list = ', '.join(current_skills[:8]) + ('...' if len(current_skills) > 8 else '')
+                    st.markdown(f"""
+                    <div class='dashboard-card'>
+                        <h4 style='color: #000000;'>Skills Overview</h4>
+                        <ul style='color: #000000; list-style: none; padding: 0;'>
+                            <li><strong>Detected Skills:</strong> {len(current_skills)}</li>
+                            <li><strong>Recommended:</strong> {len(recommended_skills)}</li>
+                            <li><strong>Matching:</strong> {matched_count} skills</li>
+                            <li><strong>Gap:</strong> {len(recommended_skills) - matched_count} skills to learn</li>
+                            <li><strong>Top Skills:</strong> {skills_list}</li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                ## ============ END DASHBOARD ============
 
                 ### Getting Current Date and Time
                 ts = time.time()
@@ -1433,6 +1962,66 @@ def show_dashboard():
                                 st.markdown("**📌 Tips:**")
                                 st.info(qa['tips'])
                 
+                ## Skill-Based Interview Questions (Based on Resume Skills)
+                st.subheader("**🎯 Skill-Specific Interview Questions**")
+                st.markdown("These questions are generated based on the skills detected in your resume:")
+                
+                skill_based_questions = generate_resume_based_questions(current_skills, reco_field)
+                
+                if skill_based_questions:
+                    for idx, sq in enumerate(skill_based_questions, 1):
+                        with st.expander(f"🔹 {sq['skill']} - {sq['question'][:60]}..."):
+                            st.markdown(f"**Skill:** `{sq['skill']}`")
+                            st.markdown(f"**❓ Question:** {sq['question']}")
+                            st.markdown("**✅ Answer:**")
+                            st.info(sq['answer'])
+                else:
+                    st.info("Add more technical skills to your resume to get skill-specific interview questions!")
+                
+                ## Trending Skills Section
+                st.header("**🔥 Trending Skills in 2026**")
+                trending_skills = get_trending_skills(reco_field)
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.markdown("""
+                    <div class='dashboard-card'>
+                        <h4 style='color: #dc2626;'>🚀 Hot Skills</h4>
+                        <p style='color: #666; font-size: 0.85rem;'>High demand right now</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    for skill in trending_skills['hot']:
+                        if skills_match(current_skills, skill):
+                            st.success(f"✅ {skill}")
+                        else:
+                            st.warning(f"📈 {skill}")
+                
+                with col2:
+                    st.markdown("""
+                    <div class='dashboard-card'>
+                        <h4 style='color: #2563eb;'>📊 Growing Skills</h4>
+                        <p style='color: #666; font-size: 0.85rem;'>Rising in demand</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    for skill in trending_skills['growing']:
+                        if skills_match(current_skills, skill):
+                            st.success(f"✅ {skill}")
+                        else:
+                            st.info(f"📈 {skill}")
+                
+                with col3:
+                    st.markdown("""
+                    <div class='dashboard-card'>
+                        <h4 style='color: #059669;'>✨ Essential Skills</h4>
+                        <p style='color: #666; font-size: 0.85rem;'>Must-have foundations</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    for skill in trending_skills['essential']:
+                        if skills_match(current_skills, skill):
+                            st.success(f"✅ {skill}")
+                        else:
+                            st.error(f"❌ {skill}")
+                
                 ## Job Recommendations
                 st.header("**💼 Job Recommendations**")
                 st.markdown("Based on your skills and experience, here are some job roles you might be interested in:")
@@ -1442,16 +2031,84 @@ def show_dashboard():
                 if job_recommendations:
                     cols = st.columns(2)
                     for idx, job in enumerate(job_recommendations):
+                        job_urls = get_job_search_urls(job['title'])
                         with cols[idx % 2]:
                             st.markdown(f"""
-                            <div style='padding: 20px; background-color: #f0f2f6; border-radius: 10px; margin-bottom: 10px; color: #000000;'>
+                            <div class='job-card'>
                                 <h3 style='color: #1e3a8a; margin-bottom: 10px;'>{job['title']}</h3>
-                                <p style='color: #000000; margin: 5px 0;'><strong>Experience Level:</strong> {job['level']}</p>
-                                <p style='color: #000000; margin: 5px 0;'><strong>Key Skills:</strong> {', '.join(job['skills'][:5])}</p>
-                                <p style='color: #000000; margin: 5px 0;'><strong>Avg Salary:</strong> {job['salary']}</p>
+                                <p style='color: #000000; margin: 5px 0;'><strong>📊 Experience Level:</strong> {job['level']}</p>
+                                <p style='color: #000000; margin: 5px 0;'><strong>🛠️ Key Skills:</strong> {', '.join(job['skills'][:5])}</p>
+                                <p style='color: #000000; margin: 5px 0;'><strong>💰 Avg Salary:</strong> {job['salary']}</p>
                                 <p style='color: #333333; margin-top: 10px;'>{job['description']}</p>
+                                <hr style='border: 1px solid #e0e0e0; margin: 15px 0;'>
+                                <p style='color: #000000; margin-bottom: 10px;'><strong>Find Jobs on:</strong></p>
+                                <div style='display: flex; flex-wrap: wrap; gap: 8px;'>
+                                    <a href='{job_urls['naukri']}' target='_blank' class='job-platform-btn btn-naukri'>Naukri</a>
+                                    <a href='{job_urls['linkedin']}' target='_blank' class='job-platform-btn btn-linkedin'>LinkedIn</a>
+                                    <a href='{job_urls['indeed']}' target='_blank' class='job-platform-btn btn-indeed'>Indeed</a>
+                                    <a href='{job_urls['glassdoor']}' target='_blank' class='job-platform-btn btn-glassdoor'>Glassdoor</a>
+                                    <a href='{job_urls['internshala']}' target='_blank' class='job-platform-btn btn-internshala'>Internshala</a>
+                                </div>
                             </div>
                             """, unsafe_allow_html=True)
+
+                ## Live Job Listings from Web Search
+                if DDGS_AVAILABLE:
+                    st.header("**🌐 Live Job Listings**")
+                    st.markdown("Real-time job openings found on the web:")
+                    
+                    with st.spinner("Searching for live job listings..."):
+                        # Search for the top recommended job
+                        if job_recommendations:
+                            top_job = job_recommendations[0]['title']
+                            live_jobs = search_live_jobs(top_job, "India", 6)
+                            
+                            if live_jobs:
+                                job_cols = st.columns(2)
+                                for idx, live_job in enumerate(live_jobs):
+                                    with job_cols[idx % 2]:
+                                        st.markdown(f"""
+                                        <div style='background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #10b981;'>
+                                            <h4 style='color: #1e3a8a; margin: 0 0 8px 0; font-size: 1rem;'>{live_job['title'][:60]}...</h4>
+                                            <p style='color: #666; font-size: 0.85rem; margin: 5px 0;'>{live_job['snippet']}</p>
+                                            <p style='color: #888; font-size: 0.75rem; margin: 5px 0;'>Source: {live_job['source']}</p>
+                                            <a href='{live_job['link']}' target='_blank' style='background: #1a1a1a; color: white; padding: 6px 12px; border-radius: 5px; text-decoration: none; font-size: 0.8rem;'>View Job →</a>
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                            else:
+                                st.info("No live jobs found. Try checking job portals directly.")
+                    
+                    ## Live Salary Insights
+                    st.subheader("**💰 Live Salary Insights**")
+                    with st.spinner("Fetching salary data..."):
+                        if job_recommendations:
+                            salary_info = search_salary_info(job_recommendations[0]['title'], "India")
+                            if salary_info:
+                                st.markdown(f"""
+                                <div style='background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; padding: 20px; margin: 10px 0;'>
+                                    <h4 style='color: #92400e; margin-bottom: 10px;'>Market Salary Info for {job_recommendations[0]['title']}</h4>
+                                    <p style='color: #78350f;'>{salary_info['info'][:300]}...</p>
+                                    <a href='{salary_info['source']}' target='_blank' style='color: #b45309; font-size: 0.85rem;'>Read more →</a>
+                                </div>
+                                """, unsafe_allow_html=True)
+                    
+                    ## Live Course Recommendations
+                    st.subheader("**📚 Recommended Learning Resources**")
+                    with st.spinner("Finding courses for your skill gaps..."):
+                        if missing_skills:
+                            # Get courses for the first missing skill
+                            skill_to_learn = missing_skills[0] if missing_skills else "programming"
+                            courses = search_courses(skill_to_learn, "free")
+                            
+                            if courses:
+                                st.markdown(f"**Courses to learn {skill_to_learn}:**")
+                                for course in courses[:3]:
+                                    st.markdown(f"""
+                                    <div style='background: #f0f9ff; border-radius: 8px; padding: 12px; margin: 8px 0; border-left: 3px solid #3b82f6;'>
+                                        <a href='{course['link']}' target='_blank' style='color: #1e40af; font-weight: 600; text-decoration: none;'>{course['title'][:70]}...</a>
+                                        <p style='color: #64748b; font-size: 0.8rem; margin-top: 5px;'>{course['description']}</p>
+                                    </div>
+                                    """, unsafe_allow_html=True)
 
                 ## Recommending Resume Writing Video
                 st.header("**Bonus Video for Resume Writing Tips**")
