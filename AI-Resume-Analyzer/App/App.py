@@ -607,6 +607,192 @@ def generate_interview_questions(field, level, skills):
     return field_questions[:5]
 
 
+###### Smart Experience Level Detection ######
+def detect_experience_level(resume_text, no_of_pages=1):
+    """
+    Intelligently detect candidate experience level based on multiple factors:
+    - Years of experience mentioned
+    - Date ranges in work history
+    - Graduation year
+    - Number of job positions
+    - Keywords and patterns
+    """
+    import re
+    from datetime import datetime
+    
+    current_year = datetime.now().year
+    resume_lower = resume_text.lower() if resume_text else ""
+    resume_upper = resume_text.upper() if resume_text else ""
+    
+    experience_score = 0
+    experience_details = {
+        'years_mentioned': 0,
+        'job_count': 0,
+        'has_internship': False,
+        'graduation_year': None,
+        'date_ranges_found': [],
+        'work_duration_years': 0
+    }
+    
+    # 1. Look for explicit years of experience patterns
+    years_patterns = [
+        r'(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)',  # "3 years experience", "5+ yrs exp"
+        r'(?:experience|exp)\s*(?:of\s*)?(\d+)\+?\s*(?:years?|yrs?)',  # "experience of 3 years"
+        r'(\d+)\+?\s*(?:years?|yrs?)\s*(?:in|of)\s*(?:industry|field|domain)',  # "5 years in industry"
+    ]
+    
+    max_years = 0
+    for pattern in years_patterns:
+        matches = re.findall(pattern, resume_lower)
+        for match in matches:
+            try:
+                years = int(match)
+                if 0 < years < 50:  # Sanity check
+                    max_years = max(max_years, years)
+            except:
+                pass
+    
+    experience_details['years_mentioned'] = max_years
+    
+    # 2. Find date ranges (work history periods)
+    # Pattern: "2020 - 2024", "Jan 2020 - Present", "2019-present"
+    date_range_patterns = [
+        r'(20\d{2})\s*[-–—to]+\s*(20\d{2}|present|current|ongoing|now)',
+        r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2})\s*[-–—to]+\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2}|present|current|ongoing|now)',
+    ]
+    
+    total_work_years = 0
+    date_ranges = []
+    
+    for pattern in date_range_patterns:
+        matches = re.findall(pattern, resume_lower)
+        for match in matches:
+            start_str, end_str = match
+            try:
+                # Extract year from start
+                start_year_match = re.search(r'20\d{2}', start_str)
+                start_year = int(start_year_match.group()) if start_year_match else None
+                
+                # Extract year from end (or use current year for "present")
+                if any(word in end_str.lower() for word in ['present', 'current', 'ongoing', 'now']):
+                    end_year = current_year
+                else:
+                    end_year_match = re.search(r'20\d{2}', end_str)
+                    end_year = int(end_year_match.group()) if end_year_match else None
+                
+                if start_year and end_year and start_year <= end_year:
+                    duration = end_year - start_year
+                    if duration <= 20:  # Sanity check
+                        date_ranges.append((start_year, end_year, duration))
+                        total_work_years += duration
+            except:
+                pass
+    
+    experience_details['date_ranges_found'] = date_ranges
+    experience_details['work_duration_years'] = total_work_years
+    
+    # 3. Find graduation year
+    grad_patterns = [
+        r'(?:graduated?|graduation|batch\s*of|class\s*of|passed\s*out)\s*:?\s*(20\d{2})',
+        r'(20\d{2})\s*[-–]\s*(20\d{2})\s*(?:b\.?tech|b\.?e|b\.?sc|m\.?tech|m\.?sc|mba|bca|mca)',
+        r'(?:b\.?tech|b\.?e|b\.?sc|bca)\s*[-–(]?\s*(20\d{2})',
+    ]
+    
+    for pattern in grad_patterns:
+        match = re.search(pattern, resume_lower)
+        if match:
+            try:
+                # Get the last year (graduation year)
+                years_found = re.findall(r'20\d{2}', match.group())
+                if years_found:
+                    grad_year = int(max(years_found))
+                    if 2000 <= grad_year <= current_year + 4:
+                        experience_details['graduation_year'] = grad_year
+                        break
+            except:
+                pass
+    
+    # 4. Count job positions/company mentions
+    job_indicators = [
+        r'\b(?:software\s*engineer|developer|analyst|manager|lead|intern|trainee|associate|executive|consultant)\b',
+        r'\b(?:worked\s*at|employed\s*at|joined|position|role\s*:)\b',
+        r'\b(?:pvt\.?\s*ltd|private\s*limited|inc\.|llc|corporation|corp\.|technologies|solutions|systems)\b',
+    ]
+    
+    job_count = 0
+    for pattern in job_indicators:
+        matches = re.findall(pattern, resume_lower)
+        job_count += len(matches)
+    
+    experience_details['job_count'] = min(job_count // 2, 10)  # Normalize (divide by 2 as patterns may overlap)
+    
+    # 5. Check for internship mentions
+    internship_patterns = r'\b(?:internship|intern|trainee|summer\s*training|industrial\s*training)\b'
+    experience_details['has_internship'] = bool(re.search(internship_patterns, resume_lower))
+    
+    # 6. Calculate experience score and determine level
+    
+    # Years mentioned score
+    if max_years >= 5:
+        experience_score += 40
+    elif max_years >= 3:
+        experience_score += 30
+    elif max_years >= 1:
+        experience_score += 15
+    
+    # Work duration from date ranges
+    if total_work_years >= 5:
+        experience_score += 35
+    elif total_work_years >= 3:
+        experience_score += 25
+    elif total_work_years >= 1:
+        experience_score += 10
+    
+    # Graduation year factor
+    if experience_details['graduation_year']:
+        years_since_grad = current_year - experience_details['graduation_year']
+        if years_since_grad >= 5:
+            experience_score += 20
+        elif years_since_grad >= 2:
+            experience_score += 10
+        elif years_since_grad <= 1:
+            experience_score -= 10  # Recent graduate, likely fresher
+    
+    # Internship bonus (but caps at intermediate)
+    if experience_details['has_internship']:
+        experience_score += 10
+    
+    # Job count factor
+    if experience_details['job_count'] >= 3:
+        experience_score += 15
+    elif experience_details['job_count'] >= 1:
+        experience_score += 5
+    
+    # Page count factor
+    if no_of_pages >= 3:
+        experience_score += 10
+    elif no_of_pages <= 1:
+        experience_score -= 5
+    
+    # Determine final level
+    if experience_score >= 50:
+        level = "Experienced"
+        level_detail = f"5+ years (Score: {experience_score})"
+    elif experience_score >= 25:
+        level = "Intermediate"
+        level_detail = f"1-4 years (Score: {experience_score})"
+    else:
+        level = "Fresher"
+        level_detail = f"0-1 years (Score: {experience_score})"
+    
+    return {
+        'level': level,
+        'level_detail': level_detail,
+        'score': experience_score,
+        'details': experience_details
+    }
+
+
 ###### Job Recommendations Generator ######
 def generate_job_recommendations(field, level, skills):
     """Generate job recommendations based on field and experience level"""
@@ -1222,46 +1408,63 @@ def show_dashboard():
 
                 except:
                     pass
-                ## Predicting Candidate Experience Level 
-
-                ### Trying with different possibilities
-                cand_level = ''
+                
+                ## Predicting Candidate Experience Level using Smart Detection
                 no_of_pages = resume_data.get('no_of_pages') or 0
                 resume_text = resume_text or ""  # Ensure resume_text is not None
-                if no_of_pages < 1:                
-                    cand_level = "NA"
-                    st.markdown( '''<h4 style='text-align: left; color: #d73b5c;'>You are at Fresher level!</h4>''',unsafe_allow_html=True)
                 
-                #### if internship then intermediate level
-                elif 'INTERNSHIP' in resume_text:
-                    cand_level = "Intermediate"
-                    st.markdown('''<h4 style='text-align: left; color: #1ed760;'>You are at intermediate level!</h4>''',unsafe_allow_html=True)
-                elif 'INTERNSHIPS' in resume_text:
-                    cand_level = "Intermediate"
-                    st.markdown('''<h4 style='text-align: left; color: #1ed760;'>You are at intermediate level!</h4>''',unsafe_allow_html=True)
-                elif 'Internship' in resume_text:
-                    cand_level = "Intermediate"
-                    st.markdown('''<h4 style='text-align: left; color: #1ed760;'>You are at intermediate level!</h4>''',unsafe_allow_html=True)
-                elif 'Internships' in resume_text:
-                    cand_level = "Intermediate"
-                    st.markdown('''<h4 style='text-align: left; color: #1ed760;'>You are at intermediate level!</h4>''',unsafe_allow_html=True)
+                # Use the smart experience detection function
+                exp_result = detect_experience_level(resume_text, no_of_pages)
+                cand_level = exp_result['level']
                 
-                #### if Work Experience/Experience then Experience level
-                elif 'EXPERIENCE' in resume_text:
-                    cand_level = "Experienced"
-                    st.markdown('''<h4 style='text-align: left; color: #fba171;'>You are at experience level!''',unsafe_allow_html=True)
-                elif 'WORK EXPERIENCE' in resume_text:
-                    cand_level = "Experienced"
-                    st.markdown('''<h4 style='text-align: left; color: #fba171;'>You are at experience level!''',unsafe_allow_html=True)
-                elif 'Experience' in resume_text:
-                    cand_level = "Experienced"
-                    st.markdown('''<h4 style='text-align: left; color: #fba171;'>You are at experience level!''',unsafe_allow_html=True)
-                elif 'Work Experience' in resume_text:
-                    cand_level = "Experienced"
-                    st.markdown('''<h4 style='text-align: left; color: #fba171;'>You are at experience level!''',unsafe_allow_html=True)
+                # Display experience level with detailed analysis
+                st.subheader("**Experience Level Analysis**")
+                
+                if cand_level == "Experienced":
+                    st.markdown(f'''<h4 style='text-align: left; color: #fba171;'>🏆 You are at <strong>Experienced</strong> level!</h4>''', unsafe_allow_html=True)
+                elif cand_level == "Intermediate":
+                    st.markdown(f'''<h4 style='text-align: left; color: #1ed760;'>📈 You are at <strong>Intermediate</strong> level!</h4>''', unsafe_allow_html=True)
                 else:
-                    cand_level = "Fresher"
-                    st.markdown('''<h4 style='text-align: left; color: #fba171;'>You are at Fresher level!!''',unsafe_allow_html=True)
+                    st.markdown(f'''<h4 style='text-align: left; color: #3b82f6;'>🌱 You are at <strong>Fresher</strong> level!</h4>''', unsafe_allow_html=True)
+                
+                # Show experience breakdown
+                with st.expander("📊 View Experience Analysis Details"):
+                    details = exp_result['details']
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**📅 Work History Analysis:**")
+                        if details['years_mentioned'] > 0:
+                            st.success(f"✅ Years mentioned: {details['years_mentioned']} years")
+                        else:
+                            st.info("ℹ️ No explicit years of experience found")
+                        
+                        if details['work_duration_years'] > 0:
+                            st.success(f"✅ Work duration from dates: ~{details['work_duration_years']} years")
+                        
+                        if details['date_ranges_found']:
+                            st.write("**Date ranges detected:**")
+                            for start, end, duration in details['date_ranges_found'][:3]:
+                                st.write(f"  • {start} - {end} ({duration} yr{'s' if duration > 1 else ''})")
+                    
+                    with col2:
+                        st.markdown("**🎓 Education & Background:**")
+                        if details['graduation_year']:
+                            years_since = 2026 - details['graduation_year']
+                            st.info(f"📜 Graduation year: {details['graduation_year']} ({years_since} years ago)")
+                        else:
+                            st.info("ℹ️ Graduation year not detected")
+                        
+                        if details['has_internship']:
+                            st.success("✅ Internship experience detected")
+                        else:
+                            st.warning("⚠️ No internship mentions found")
+                        
+                        st.write(f"**Job indicators found:** {details['job_count']}")
+                    
+                    st.markdown("---")
+                    st.markdown(f"**Experience Score:** `{exp_result['score']}/100`")
+                    st.caption("Score breakdown: Years mentioned (40pts) + Work duration (35pts) + Graduation factor (20pts) + Job count (15pts) + Internship (10pts)")
 
 
                 ## Skills Analyzing and Recommendation
