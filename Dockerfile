@@ -18,9 +18,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Download spaCy model (using python -m spacy download is more reliable)
-RUN python -m spacy download en_core_web_sm
-
 # Download NLTK data
 RUN python -m nltk.downloader stopwords punkt wordnet averaged_perceptron_tagger
 
