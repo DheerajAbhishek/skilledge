@@ -17,7 +17,6 @@ import plotly.express as px # to create visualisations at the admin session
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
 # libraries used to parse the pdf files
-from pyresparser import ResumeParser
 from pdfminer3.layout import LAParams, LTTextBox
 from pdfminer3.pdfpage import PDFPage
 from pdfminer3.pdfinterp import PDFResourceManager
@@ -524,61 +523,115 @@ def show_dashboard():
             
             show_pdf(save_image_path)
 
-            ### parsing and extracting whole resume 
+            ### parsing and extracting whole resume using enhanced text extraction
             resume_data = None
             try:
-                resume_data = ResumeParser(save_image_path).get_extracted_data()
-                print("DEBUG - Extracted resume data:", resume_data)
-            except Exception as e:
-                print(f"pyresparser failed: {str(e)}")
-                st.info("Using alternative parsing method...")
+                resume_text = pdf_reader(save_image_path)
                 
-                # Fallback: Extract text and create basic resume_data
-                try:
-                    resume_text = pdf_reader(save_image_path)
-                    
-                    # Basic extraction using regex and text analysis
-                    import re
-                    
-                    # Try to extract email
-                    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-                    emails = re.findall(email_pattern, resume_text)
-                    email = emails[0] if emails else None
-                    
-                    # Try to extract phone
-                    phone_pattern = r'[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}'
-                    phones = re.findall(phone_pattern, resume_text)
-                    phone = phones[0] if phones else None
-                    
-                    # Extract name (first line usually)
-                    lines = [line.strip() for line in resume_text.split('\n') if line.strip()]
-                    name = lines[0] if lines else None
-                    
-                    # Count pages
-                    with open(save_image_path, 'rb') as f:
-                        from pdfminer3.pdfpage import PDFPage
-                        pages = list(PDFPage.get_pages(f))
-                        no_of_pages = len(pages)
-                    
-                    # Create basic resume_data structure
-                    resume_data = {
-                        'name': name,
-                        'email': email,
-                        'mobile_number': phone,
-                        'skills': [],
-                        'no_of_pages': no_of_pages,
-                        'degree': None
-                    }
-                    
-                    st.success("Resume parsed successfully using alternative method!")
-                    print("DEBUG - Fallback resume data:", resume_data)
-                    
-                except Exception as fallback_error:
-                    st.error("Unable to parse the resume. Please ensure it's a valid PDF with text (not scanned image).")
-                    print(f"Fallback parsing also failed: {str(fallback_error)}")
-                    import traceback
-                    print("ERROR:", traceback.format_exc())
-                    return
+                # Enhanced extraction using regex and keyword matching
+                import re
+                
+                # Try to extract email
+                email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                emails = re.findall(email_pattern, resume_text)
+                email = emails[0] if emails else None
+                
+                # Try to extract phone
+                phone_pattern = r'[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}'
+                phones = re.findall(phone_pattern, resume_text)
+                phone = phones[0] if phones else None
+                
+                # Extract name (first few lines, skip common headers)
+                lines = [line.strip() for line in resume_text.split('\n') if line.strip()]
+                name = None
+                for line in lines[:5]:  # Check first 5 lines
+                    if line and len(line) < 50 and not any(word in line.lower() for word in ['resume', 'cv', 'curriculum']):
+                        name = line
+                        break
+                
+                # Extract skills using comprehensive keyword matching
+                skills_keywords = [
+                    # Programming Languages
+                    'python', 'java', 'javascript', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift', 'kotlin',
+                    'typescript', 'scala', 'r', 'matlab', 'perl', 'objective-c',
+                    # Web Technologies
+                    'html', 'css', 'react', 'angular', 'vue', 'node', 'django', 'flask', 'spring', 'express',
+                    'jquery', 'bootstrap', 'tailwind', 'sass', 'webpack', 'next.js', 'nuxt',
+                    # Mobile
+                    'android', 'ios', 'flutter', 'react native', 'xamarin', 'ionic',
+                    # Databases
+                    'sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'oracle', 'sqlite', 'cassandra',
+                    'dynamodb', 'firebase', 'elasticsearch',
+                    # Cloud & DevOps
+                    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'jenkins', 'git', 'ci/cd', 'terraform',
+                    'ansible', 'linux', 'unix', 'nginx', 'apache',
+                    # Data Science & ML
+                    'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'keras', 'scikit-learn',
+                    'pandas', 'numpy', 'matplotlib', 'data analysis', 'data visualization', 'tableau',
+                    'power bi', 'excel', 'statistics', 'nlp', 'computer vision',
+                    # Other
+                    'agile', 'scrum', 'rest api', 'graphql', 'microservices', 'testing', 'selenium',
+                    'api', 'ui/ux', 'figma', 'adobe xd', 'photoshop', 'illustrator'
+                ]
+                
+                detected_skills = []
+                resume_lower = resume_text.lower()
+                for skill in skills_keywords:
+                    if skill.lower() in resume_lower:
+                        detected_skills.append(skill.title())
+                
+                # Remove duplicates and sort
+                detected_skills = sorted(list(set(detected_skills)))
+                
+                # Extract degree information
+                degree_keywords = {
+                    'bachelor': 'Bachelor',
+                    'master': 'Master',
+                    'phd': 'PhD',
+                    'doctorate': 'PhD',
+                    'b.tech': 'B.Tech',
+                    'b.e': 'B.E',
+                    'm.tech': 'M.Tech',
+                    'mba': 'MBA',
+                    'bca': 'BCA',
+                    'mca': 'MCA',
+                    'bsc': 'B.Sc',
+                    'msc': 'M.Sc',
+                    'ba': 'B.A',
+                    'ma': 'M.A'
+                }
+                
+                degree = None
+                for key, value in degree_keywords.items():
+                    if key in resume_lower:
+                        degree = value
+                        break
+                
+                # Count pages
+                with open(save_image_path, 'rb') as f:
+                    from pdfminer3.pdfpage import PDFPage
+                    pages = list(PDFPage.get_pages(f))
+                    no_of_pages = len(pages)
+                
+                # Create resume_data structure
+                resume_data = {
+                    'name': name,
+                    'email': email,
+                    'mobile_number': phone,
+                    'skills': detected_skills,
+                    'no_of_pages': no_of_pages,
+                    'degree': degree
+                }
+                
+                st.success("✅ Resume parsed successfully!")
+                print("DEBUG - Extracted resume data:", resume_data)
+                
+            except Exception as parse_error:
+                st.error("Unable to parse the resume. Please ensure it's a valid PDF with text (not scanned image).")
+                print(f"Resume parsing failed: {str(parse_error)}")
+                import traceback
+                print("ERROR:", traceback.format_exc())
+                return
                 
             if resume_data:
                 
