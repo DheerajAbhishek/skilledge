@@ -654,20 +654,46 @@ def detect_experience_level(resume_text, no_of_pages=1):
     
     experience_details['years_mentioned'] = max_years
     
-    # 2. Find date ranges (work history periods)
+    # 2. Find date ranges (WORK history only, excluding education)
     # Pattern: "2020 - 2024", "Jan 2020 - Present", "2019-present"
     date_range_patterns = [
         r'(20\d{2})\s*[-–—to]+\s*(20\d{2}|present|current|ongoing|now)',
         r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2})\s*[-–—to]+\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2}|present|current|ongoing|now)',
     ]
     
+    # Education keywords to exclude date ranges near these
+    education_keywords = [
+        'b\.?tech', 'b\.?e\.?', 'b\.?sc', 'b\.?com', 'b\.?a\.?', 'bca', 'bba',
+        'm\.?tech', 'm\.?e\.?', 'm\.?sc', 'm\.?com', 'm\.?a\.?', 'mca', 'mba',
+        'bachelor', 'master', 'degree', 'diploma', 'ph\.?d', 'doctorate',
+        'school', 'college', 'university', 'institute', 'education',
+        '10th', '12th', 'xii', 'x\s', 'ssc', 'hsc', 'cbse', 'icse',
+        'secondary', 'higher\s*secondary', 'intermediate', 'matriculation',
+        'class\s*10', 'class\s*12', 'board', 'jee', 'neet', 'gate',
+        'cgpa', 'gpa', 'percentage', 'marks', 'grade', 'semester',
+        'graduation', 'graduated', 'pursuing', 'enrolled'
+    ]
+    education_pattern = '|'.join(education_keywords)
+    
     total_work_years = 0
     date_ranges = []
     
     for pattern in date_range_patterns:
-        matches = re.findall(pattern, resume_lower)
-        for match in matches:
-            start_str, end_str = match
+        # Use finditer to get match positions
+        for match in re.finditer(pattern, resume_lower):
+            start_str, end_str = match.groups()
+            match_start = match.start()
+            match_end = match.end()
+            
+            # Check context around the date range (100 chars before and after)
+            context_start = max(0, match_start - 100)
+            context_end = min(len(resume_lower), match_end + 100)
+            context = resume_lower[context_start:context_end]
+            
+            # Skip if education keywords found in context
+            if re.search(education_pattern, context):
+                continue  # This is likely an education date, skip it
+            
             try:
                 # Extract year from start
                 start_year_match = re.search(r'20\d{2}', start_str)
