@@ -102,37 +102,42 @@ try:
     # First, try Streamlit secrets (for Streamlit Cloud)
     try:
         mongodb_uri = st.secrets["MONGODB_URI"]
-        print("Using MongoDB URI from Streamlit secrets")
-    except:
+        print("✓ Using MongoDB URI from Streamlit secrets")
+    except Exception as secret_err:
+        print(f"✗ Streamlit secrets not found: {secret_err}")
         pass
     
     # If not in secrets, try environment variable
     if not mongodb_uri:
         mongodb_uri = os.environ.get('MONGODB_URI')
         if mongodb_uri:
-            print("Using MongoDB URI from environment variable")
+            print("✓ Using MongoDB URI from environment variable")
     
     # If still not found, use local MongoDB
     if not mongodb_uri:
         mongodb_uri = 'mongodb://localhost:27017/'
-        print("Using local MongoDB")
+        print("⚠ Using local MongoDB (localhost:27017)")
+    
+    print(f"Attempting to connect to: {mongodb_uri[:20]}...")
     
     # For MongoDB Atlas, we need special SSL handling
     if 'mongodb+srv' in mongodb_uri or 'mongodb.net' in mongodb_uri:
         print("Connecting to MongoDB Atlas...")
         client = MongoClient(
             mongodb_uri,
-            serverSelectionTimeoutMS=3000,  # Reduced from 10000
-            connectTimeoutMS=3000,  # Reduced from 10000
-            socketTimeoutMS=3000,  # Reduced from 10000
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+            socketTimeoutMS=5000,
             retryWrites=True,
-            w='majority'
+            w='majority',
+            tlsAllowInvalidCertificates=False
         )
     else:
         print("Connecting to local MongoDB...")
-        client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=3000)
+        client = MongoClient(mongodb_uri, serverSelectionTimeoutMS=5000)
     
     # Test connection with timeout
+    print("Testing connection with ping...")
     client.admin.command('ping')
     
     db = client['skilledge_db']
@@ -140,9 +145,13 @@ try:
     feedback_collection = db['user_feedback']
     DB_AVAILABLE = True
     print("✅ MongoDB connected successfully!")
+    print(f"✅ Database: skilledge_db")
 except Exception as e:
     print(f"❌ MongoDB connection failed: {str(e)}")
-    print("Running in demo mode without database. Data will not be saved.")
+    print(f"❌ Error type: {type(e).__name__}")
+    import traceback
+    print(traceback.format_exc())
+    print("⚠ Running in demo mode without database. Data will not be saved.")
     client = None
     db = None
     user_collection = None
