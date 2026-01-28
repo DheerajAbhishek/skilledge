@@ -768,11 +768,8 @@ def detect_experience_level(resume_text, no_of_pages=1):
     elif experience_details['job_count'] >= 1:
         experience_score += 5
     
-    # Page count factor
-    if no_of_pages >= 3:
-        experience_score += 10
-    elif no_of_pages <= 1:
-        experience_score -= 5
+    # Note: Page count is NOT used as it's unreliable
+    # (freshers can have long resumes, experienced can have short ones)
     
     # Determine final level
     if experience_score >= 50:
