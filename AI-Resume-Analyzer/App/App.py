@@ -13,6 +13,7 @@ import platform
 import geocoder
 import secrets
 import io,random
+import re
 import plotly.express as px # to create visualisations at the admin session
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
@@ -27,6 +28,8 @@ from PIL import Image
 # pre stored data for prediction purposes
 from Courses import ds_course,web_course,android_course,ios_course,uiux_course,cybersecurity_course,cloud_course,data_analyst_course,ml_ai_course,devops_course,resume_videos,interview_videos
 import nltk
+import requests
+import json
 nltk.download('stopwords')
 
 
@@ -2101,6 +2104,259 @@ def get_job_search_urls(job_title):
     }
 
 
+###### Groq API Integration for AI-Powered Questions ######
+def get_groq_api_key():
+    """Get Groq API key from secrets, environment, or session state"""
+    # Try Streamlit secrets first
+    try:
+        return st.secrets.get("GROQ_API_KEY")
+    except:
+        pass
+    # Try environment variable
+    api_key = os.environ.get('GROQ_API_KEY')
+    if api_key:
+        return api_key
+    # Try session state (user-provided)
+    if 'groq_api_key' in st.session_state and st.session_state.groq_api_key:
+        return st.session_state.groq_api_key
+    return None
+
+
+def call_groq_api(prompt, max_tokens=1500):
+    """Call Groq API to generate content"""
+    api_key = get_groq_api_key()
+    if not api_key:
+        return None
+    
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are an expert technical interviewer. Generate insightful, practical interview questions that test real understanding. Be specific and technical."
+            },
+            {
+                "role": "user", 
+                "content": prompt
+            }
+        ],
+        "max_tokens": max_tokens,
+        "temperature": 0.7
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            print(f"Groq API error: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Groq API exception: {e}")
+        return None
+
+
+def extract_resume_details(resume_text):
+    """Extract projects, certifications, and experience from resume text"""
+    import re
+    
+    details = {
+        'projects': [],
+        'certifications': [],
+        'companies': [],
+        'experience_descriptions': []
+    }
+    
+    resume_lower = resume_text.lower()
+    lines = resume_text.split('\n')
+    
+    # Extract Projects
+    project_section = False
+    project_patterns = [
+        r'projects?\s*:?\s*$',
+        r'academic\s*projects?\s*:?\s*$',
+        r'personal\s*projects?\s*:?\s*$',
+        r'key\s*projects?\s*:?\s*$'
+    ]
+    
+    current_project = []
+    for i, line in enumerate(lines):
+        line_lower = line.lower().strip()
+        
+        # Check if entering projects section
+        if any(re.search(p, line_lower) for p in project_patterns):
+            project_section = True
+            continue
+        
+        # Check if leaving projects section (new major section)
+        if project_section and re.search(r'^(education|experience|skills|certification|achievement|hobby|interest)', line_lower):
+            project_section = False
+            if current_project:
+                details['projects'].append(' '.join(current_project))
+                current_project = []
+        
+        # Collect project content
+        if project_section and line.strip():
+            # Check if this looks like a project title (often starts with bullet or is short)
+            if line.strip().startswith(('•', '-', '*', '▪', '●')) or (len(line.strip()) < 80 and i > 0):
+                if current_project:
+                    details['projects'].append(' '.join(current_project))
+                current_project = [line.strip().lstrip('•-*▪● ')]
+            elif current_project:
+                current_project.append(line.strip())
+    
+    if current_project:
+        details['projects'].append(' '.join(current_project))
+    
+    # Extract Certifications
+    cert_patterns = [
+        r'certified\s+(?:in\s+)?([^,\n\.]+)',
+        r'certification\s*(?:in|:)?\s*([^,\n\.]+)',
+        r'([^,\n\.]*?)\s+certification',
+        r'([^,\n\.]*?)\s+certified',
+        r'certificate\s+(?:in|of)\s+([^,\n\.]+)',
+    ]
+    
+    for pattern in cert_patterns:
+        matches = re.findall(pattern, resume_lower)
+        for match in matches:
+            cert = match.strip()
+            if len(cert) > 3 and len(cert) < 100:
+                details['certifications'].append(cert.title())
+    
+    # Also look for certification section
+    cert_section = False
+    for line in lines:
+        line_lower = line.lower().strip()
+        if re.search(r'^certifications?\s*:?\s*$', line_lower):
+            cert_section = True
+            continue
+        if cert_section and re.search(r'^(education|experience|skills|project|achievement)', line_lower):
+            cert_section = False
+        if cert_section and line.strip() and len(line.strip()) > 5:
+            cert_text = line.strip().lstrip('•-*▪● ')
+            if cert_text and len(cert_text) < 150:
+                details['certifications'].append(cert_text)
+    
+    # Extract Companies (from experience section)
+    company_patterns = [
+        r'(?:at|@)\s+([A-Z][A-Za-z\s&]+(?:Inc|LLC|Ltd|Corp|Company|Technologies|Solutions|Services)?)',
+        r'([A-Z][A-Za-z\s&]+(?:Inc|LLC|Ltd|Corp|Company|Technologies|Solutions|Services))',
+    ]
+    
+    for pattern in company_patterns:
+        matches = re.findall(pattern, resume_text)
+        for match in matches:
+            company = match.strip()
+            if len(company) > 3 and len(company) < 50:
+                details['companies'].append(company)
+    
+    # Remove duplicates
+    details['projects'] = list(set(details['projects']))[:5]  # Top 5 projects
+    details['certifications'] = list(set(details['certifications']))[:5]  # Top 5 certifications
+    details['companies'] = list(set(details['companies']))[:3]  # Top 3 companies
+    
+    return details
+
+
+def generate_ai_personalized_questions(resume_text, skills, field, level):
+    """Generate personalized interview questions using Groq AI"""
+    
+    # Extract resume details
+    details = extract_resume_details(resume_text)
+    
+    # Build the prompt
+    projects_text = "\n".join([f"- {p}" for p in details['projects']]) if details['projects'] else "No specific projects mentioned"
+    certs_text = "\n".join([f"- {c}" for c in details['certifications']]) if details['certifications'] else "No certifications mentioned"
+    skills_text = ", ".join(skills[:10]) if skills else "General skills"
+    
+    prompt = f"""Based on this candidate's resume, generate 5 highly personalized technical interview questions.
+
+**Candidate Profile:**
+- Target Role: {field}
+- Experience Level: {level}
+- Key Skills: {skills_text}
+
+**Projects from Resume:**
+{projects_text}
+
+**Certifications:**
+{certs_text}
+
+**Instructions:**
+1. Ask specific questions about their projects (architecture, challenges, decisions)
+2. Ask about skills they've listed - test depth of knowledge
+3. If they have certifications, ask relevant questions
+4. Match question difficulty to their experience level ({level})
+5. Make questions conversational like a real interview
+
+**Output Format (JSON array):**
+[
+  {{
+    "question": "Your specific question here",
+    "context": "Why this question is relevant to their resume",
+    "expected_points": "Key points a good answer should cover"
+  }}
+]
+
+Generate exactly 5 questions in valid JSON format:"""
+
+    response = call_groq_api(prompt)
+    
+    if response:
+        try:
+            # Try to parse JSON from response
+            # Find JSON array in response
+            json_match = re.search(r'\[[\s\S]*\]', response)
+            if json_match:
+                questions = json.loads(json_match.group())
+                return questions
+        except json.JSONDecodeError as e:
+            print(f"JSON parse error: {e}")
+            # Return raw response as fallback
+            return None
+    
+    return None
+
+
+def generate_skill_deep_dive_questions(skill, level):
+    """Generate in-depth questions for a specific skill using AI"""
+    
+    prompt = f"""Generate 2 interview questions for a {level} candidate about {skill}.
+
+**Requirements:**
+1. First question: Conceptual understanding
+2. Second question: Practical application/scenario
+
+**Output Format (JSON array):**
+[
+  {{
+    "question": "Question text",
+    "difficulty": "easy/medium/hard",
+    "answer_points": "Key points for a good answer"
+  }}
+]
+
+Generate exactly 2 questions in valid JSON:"""
+
+    response = call_groq_api(prompt, max_tokens=500)
+    
+    if response:
+        try:
+            json_match = re.search(r'\[[\s\S]*\]', response)
+            if json_match:
+                return json.loads(json_match.group())
+        except:
+            pass
+    return None
+
+
 ###### Resume-Based Interview Questions Generator ######
 def generate_resume_based_questions(skills, field, projects_text=""):
     """Generate interview questions specifically based on resume skills"""
@@ -2434,6 +2690,7 @@ def show_dashboard():
                     'Python': [r'\bpython\b'],
                     'Java': [r'\bjava\b(?!script)'],
                     'JavaScript': [r'\bjavascript\b', r'\bjs\b', r'\bnode\.?js\b', r'\breact\.?js\b', r'\bvue\.?js\b', r'\bnext\.?js\b', r'\bnuxt\.?js\b', r'\bangular\.?js\b'],
+                    'C': [r'\bc\b(?!\+\+|#|sharp)', r'\bc\s+programming\b', r'\bc\s+language\b'],
                     'C++': [r'\bc\+\+\b', r'\bcpp\b'],
                     'C#': [r'\bc#\b', r'\bcsharp\b', r'\bc sharp\b'],
                     'PHP': [r'\bphp\b'],
@@ -2501,11 +2758,16 @@ def show_dashboard():
                     'Matplotlib': [r'\bmatplotlib\b'],
                     'Data Analysis': [r'\bdata\s*analysis\b', r'\bdata\s*analyst\b'],
                     'Data Visualization': [r'\bdata\s*visualization\b', r'\bdata\s*viz\b'],
+                    'Data Mining': [r'\bdata\s*mining\b'],
                     'Tableau': [r'\btableau\b'],
                     'Power BI': [r'\bpower\s*bi\b', r'\bpowerbi\b'],
                     'Excel': [r'\bexcel\b', r'\bms\s*excel\b'],
                     'NLP': [r'\bnlp\b', r'\bnatural\s*language\b'],
                     'Computer Vision': [r'\bcomputer\s*vision\b', r'\bcv\b', r'\bopencv\b'],
+                    # CS Fundamentals
+                    'DBMS': [r'\bdbms\b', r'\bdatabase\s*management\b'],
+                    'Computer Networks': [r'\bcomputer\s*network\b', r'\bcomputer\s*networks\b', r'\bnetworking\b'],
+                    'Operating Systems': [r'\boperating\s*system\b', r'\boperating\s*systems\b', r'\bos\b'],
                     # Other
                     'Agile': [r'\bagile\b'],
                     'Scrum': [r'\bscrum\b'],
@@ -2517,6 +2779,8 @@ def show_dashboard():
                     'Adobe XD': [r'\badobe\s*xd\b', r'\bxd\b'],
                     'Photoshop': [r'\bphotoshop\b'],
                     'Illustrator': [r'\billustrator\b'],
+                    # Software/Tools
+                    'Office 365': [r'\boffice\s*365\b', r'\boffice365\b', r'\bmicrosoft\s*office\b', r'\bms\s*office\b'],
                 }
                 
                 detected_skills = []
@@ -3546,6 +3810,89 @@ def show_dashboard():
                 </div>
                 ''', unsafe_allow_html=True)
                 
+                # Check if Groq API key is available
+                groq_available = get_groq_api_key() is not None
+                
+                # Option to add Groq API key if not available
+                if not groq_available:
+                    with st.expander("🔑 Enable AI-Powered Personalized Questions (Optional)"):
+                        st.markdown("""
+                        **Get more personalized interview questions!**
+                        
+                        Add your free Groq API key to unlock AI-powered questions based on:
+                        - Your specific projects
+                        - Your certifications  
+                        - Your unique skill combination
+                        
+                        Get a free API key at: [console.groq.com](https://console.groq.com)
+                        """)
+                        api_key_input = st.text_input("Enter Groq API Key", type="password", key="groq_key_input")
+                        if st.button("Save API Key"):
+                            if api_key_input:
+                                st.session_state.groq_api_key = api_key_input
+                                st.success("API key saved! Refresh to see personalized questions.")
+                                st.rerun()
+                
+                # === AI-PERSONALIZED QUESTIONS (if Groq available) ===
+                if get_groq_api_key():
+                    st.markdown('''
+                    <div style="margin: 32px 0 16px 0;">
+                        <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">🎯 Personalized Questions (AI-Powered)</h4>
+                        <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem;">Questions based on YOUR resume - projects, certifications & skills</p>
+                    </div>
+                    ''', unsafe_allow_html=True)
+                    
+                    # Extract resume details for display
+                    resume_details = extract_resume_details(resume_text)
+                    
+                    # Show what was detected
+                    with st.expander("📋 What we found in your resume"):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("**Projects Detected:**")
+                            if resume_details['projects']:
+                                for p in resume_details['projects'][:3]:
+                                    st.markdown(f"• {p[:100]}...")
+                            else:
+                                st.info("No projects section found")
+                        with col2:
+                            st.markdown("**Certifications Detected:**")
+                            if resume_details['certifications']:
+                                for c in resume_details['certifications'][:3]:
+                                    st.markdown(f"• {c}")
+                            else:
+                                st.info("No certifications found")
+                    
+                    # Generate AI questions
+                    with st.spinner("🤖 Generating personalized interview questions..."):
+                        ai_questions = generate_ai_personalized_questions(
+                            resume_text, 
+                            current_skills, 
+                            reco_field, 
+                            cand_level
+                        )
+                    
+                    if ai_questions:
+                        for idx, q in enumerate(ai_questions, 1):
+                            question_text = q.get('question', 'Question not available')
+                            with st.expander(f"🎯 Q{idx}: {question_text[:70]}..."):
+                                st.markdown(f"**Question:** {question_text}")
+                                if q.get('context'):
+                                    st.markdown(f"**Why this question:** {q['context']}")
+                                if q.get('expected_points'):
+                                    st.markdown("**Key points to cover:**")
+                                    st.success(q['expected_points'])
+                    else:
+                        st.info("Could not generate AI questions. Showing standard questions below.")
+                
+                # === STANDARD FIELD-BASED QUESTIONS ===
+                st.markdown('''
+                <div style="margin: 32px 0 16px 0;">
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">📚 Standard Interview Questions</h4>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem;">Common questions for {field} roles</p>
+                </div>
+                '''.format(field=reco_field), unsafe_allow_html=True)
+                
                 # Generate interview questions based on field and experience level
                 interview_questions = generate_interview_questions(reco_field, cand_level, current_skills)
                 
@@ -3561,7 +3908,7 @@ def show_dashboard():
                 ## Skill-Based Interview Questions (Based on Resume Skills)
                 st.markdown('''
                 <div style="margin: 32px 0 16px 0;">
-                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Skill-Specific Questions</h4>
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">🛠️ Skill-Specific Questions</h4>
                     <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem;">Based on the skills detected in your resume</p>
                 </div>
                 ''', unsafe_allow_html=True)
