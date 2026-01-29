@@ -467,7 +467,7 @@ def load_css():
         }
         
         .navbar-brand {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
             -webkit-background-clip: text;
@@ -481,8 +481,8 @@ def load_css():
         
         .navbar-brand::before {
             content: "";
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
             border-radius: var(--radius-sm);
             display: inline-block;
@@ -1375,6 +1375,14 @@ def load_css():
             padding-left: 2rem;
             padding-right: 3rem;
             padding: 27px;
+        }
+        
+        /* ============================================
+           FIX CONTAINER WIDTH TO FIT SCREEN
+           ============================================ */
+        .st-emotion-cache-tn0cau {
+            width: 100% !important;
+            max-width: 100% !important;
         }
         
     </style>
@@ -3641,7 +3649,7 @@ def show_dashboard():
                     st.dataframe(breakdown_df, use_container_width=True)
                     st.info(f"**Total Score: {int(resume_score)}/100** ({int(score_percentage)}%)")
                 
-                st.warning("** Note: This score is calculated based on the content and completeness of your Resume. **")
+                st.warning("Note: This score is calculated based on the content and completeness of your Resume.")
 
                 # print(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data['name'], resume_data['email'], str(resume_score), timestamp, str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']), str(recommended_skills), str(rec_course), pdf_name)
 
