@@ -1262,220 +1262,23 @@ def load_css():
         /* ============================================
            RESPONSIVE BREAKPOINTS
            ============================================ */
-        
-        /* Extra Large Screens (1400px+) */
-        @media (min-width: 1400px) {
-            .main .block-container {
-                max-width: 1400px !important;
-                padding: 48px 60px !important;
-            }
-            .hero-title { font-size: 5.5rem; }
-            .bento-grid { gap: 24px; }
-        }
-        
-        /* Large Screens / Laptops (1200px - 1399px) */
-        @media (max-width: 1399px) and (min-width: 1200px) {
-            .main .block-container {
-                padding: 40px 48px !important;
-            }
-            .hero-title { font-size: 4.5rem; }
-            .hero-section { padding: 80px 24px 50px; }
-        }
-        
-        /* Medium Screens / Tablets Landscape (992px - 1199px) */
-        @media (max-width: 1199px) and (min-width: 992px) {
-            .main .block-container {
-                padding: 36px 32px !important;
-            }
-            .hero-title { font-size: 3.75rem; }
-            .hero-subtitle { font-size: 1.375rem; }
-            .hero-section { padding: 70px 20px 45px; }
-            .login-card { padding: 40px 36px; }
-            .dashboard-card { padding: 24px; }
-            .bento-grid { 
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 18px;
-            }
-        }
-        
-        /* Tablets Portrait (768px - 991px) */
-        @media (max-width: 991px) and (min-width: 768px) {
+        @media (max-width: 768px) {
             :root {
-                --radius-lg: 22px;
-                --radius-xl: 26px;
+                --radius-lg: 20px;
+                --radius-xl: 24px;
             }
             
-            .main .block-container {
-                padding: 32px 24px !important;
-            }
-            .hero-title { font-size: 3rem; }
-            .hero-subtitle { font-size: 1.25rem; }
-            .hero-section { padding: 60px 16px 40px; max-width: 100%; }
-            .navbar { padding: 14px 24px; }
-            .login-card { padding: 36px 28px; max-width: 380px; }
-            .dashboard-card { padding: 22px; }
-            .score-card { padding: 28px 20px; }
-            .score-value { font-size: 2.25rem; }
-            .bento-grid { 
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 16px;
-            }
-            .section-title { font-size: 1.625rem; }
-            .section-subtitle { font-size: 1rem; }
-        }
-        
-        /* Mobile Landscape / Large Phones (576px - 767px) */
-        @media (max-width: 767px) and (min-width: 576px) {
-            :root {
-                --radius-lg: 18px;
-                --radius-xl: 22px;
-            }
-            
-            .main .block-container {
-                padding: 24px 20px !important;
-            }
             .hero-title { font-size: 2.5rem; }
             .hero-subtitle { font-size: 1.125rem; }
-            .hero-section { padding: 50px 16px 35px; max-width: 100%; }
             .navbar { padding: 12px 20px; }
-            .navbar-brand { font-size: 1.25rem !important; }
-            .login-card { padding: 32px 24px; max-width: 100%; margin: 0 16px; }
             .dashboard-card { padding: 20px; }
+            .login-card { padding: 32px 24px; margin: 0 16px; }
             .score-card { padding: 24px 16px; }
             .score-value { font-size: 2rem; }
-            .bento-grid { 
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .section-title { font-size: 1.5rem; }
-            .section-subtitle { font-size: 0.9375rem; margin-bottom: 24px; }
-            .skill-tag { padding: 6px 12px; font-size: 0.75rem; }
-        }
-        
-        /* Mobile Portrait (up to 575px) */
-        @media (max-width: 575px) {
-            :root {
-                --radius-lg: 16px;
-                --radius-xl: 20px;
-            }
             
             .main .block-container {
-                padding: 16px 12px !important;
+                padding: 24px 16px !important;
             }
-            .hero-title { font-size: 2rem; letter-spacing: -0.03em; }
-            .hero-subtitle { font-size: 1rem; margin-bottom: 32px; }
-            .hero-section { padding: 40px 12px 30px; max-width: 100%; }
-            .navbar { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
-            .navbar-brand { font-size: 1.125rem !important; }
-            .navbar-user { font-size: 0.875rem !important; }
-            .login-card { 
-                padding: 28px 20px; 
-                max-width: 100%; 
-                margin: 0 12px; 
-                border-radius: var(--radius-lg);
-            }
-            .login-card h2 { font-size: 1.375rem !important; }
-            .dashboard-card { padding: 16px; border-radius: var(--radius-lg); }
-            .score-card { padding: 20px 14px; }
-            .score-value { font-size: 1.75rem; }
-            .bento-grid { 
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .section-title { font-size: 1.375rem; }
-            .section-subtitle { font-size: 0.875rem; margin-bottom: 20px; }
-            .skill-tag { 
-                padding: 5px 10px; 
-                font-size: 0.6875rem; 
-                margin: 2px;
-            }
-            
-            /* Fix overlapping elements on small screens */
-            [data-testid="column"] {
-                min-width: 100% !important;
-            }
-            
-            /* Stack elements vertically */
-            .stHorizontalBlock {
-                flex-direction: column !important;
-            }
-            
-            /* Reduce button padding */
-            .stButton > button {
-                padding: 10px 20px !important;
-                font-size: 0.875rem !important;
-            }
-            
-            /* Smaller input fields */
-            .stTextInput input, .stTextArea textarea {
-                font-size: 0.9375rem !important;
-                padding: 12px !important;
-            }
-        }
-        
-        /* Extra Small Screens (up to 400px) */
-        @media (max-width: 400px) {
-            .main .block-container {
-                padding: 12px 8px !important;
-            }
-            .hero-title { font-size: 1.75rem; }
-            .hero-subtitle { font-size: 0.9375rem; }
-            .hero-section { padding: 32px 8px 24px; }
-            .login-card { padding: 24px 16px; margin: 0 8px; }
-            .score-value { font-size: 1.5rem; }
-            .dashboard-card { padding: 14px; }
-            .section-title { font-size: 1.25rem; }
-            
-            /* Prevent horizontal scroll */
-            body, html {
-                overflow-x: hidden !important;
-            }
-            
-            .main {
-                overflow-x: hidden !important;
-            }
-        }
-        
-        /* Fix for Streamlit columns on all mobile */
-        @media (max-width: 768px) {
-            /* Force single column layout */
-            [data-testid="stHorizontalBlock"] {
-                flex-wrap: wrap !important;
-            }
-            
-            [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-                flex: 1 1 100% !important;
-                min-width: 100% !important;
-            }
-            
-            /* Fix dataframe/table overflow */
-            [data-testid="stDataFrame"] {
-                overflow-x: auto !important;
-            }
-            
-            /* Fix expander width */
-            .streamlit-expanderHeader {
-                font-size: 0.9375rem !important;
-            }
-            
-            /* Adjust chart containers */
-            [data-testid="stPlotlyChart"],
-            [data-testid="stVegaLiteChart"] {
-                width: 100% !important;
-                overflow-x: auto !important;
-            }
-        }
-        
-        /* Prevent content overflow globally */
-        .element-container, .stMarkdown {
-            max-width: 100% !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-        }
-        
-        img, video, iframe {
-            max-width: 100% !important;
-            height: auto !important;
         }
         
         /* ============================================
