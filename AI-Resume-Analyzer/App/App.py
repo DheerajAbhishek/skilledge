@@ -140,19 +140,18 @@ try:
     
     print(f"Attempting to connect to: {mongodb_uri[:20]}...")
     
-    # For MongoDB Atlas, we need special SSL handling
+    # For MongoDB Atlas, we need special SSL handling with certifi
     if 'mongodb+srv' in mongodb_uri or 'mongodb.net' in mongodb_uri:
         print("Connecting to MongoDB Atlas...")
-        import ssl
+        import certifi
         client = MongoClient(
             mongodb_uri,
-            serverSelectionTimeoutMS=5000,
-            connectTimeoutMS=5000,
-            socketTimeoutMS=5000,
+            serverSelectionTimeoutMS=10000,
+            connectTimeoutMS=10000,
+            socketTimeoutMS=10000,
             retryWrites=True,
             w='majority',
-            tls=True,
-            tlsAllowInvalidCertificates=True  # Allow for development/testing
+            tlsCAFile=certifi.where()  # Use certifi CA bundle for SSL
         )
     else:
         print("Connecting to local MongoDB...")
