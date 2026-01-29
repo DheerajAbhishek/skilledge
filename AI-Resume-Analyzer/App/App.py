@@ -1,4 +1,4 @@
-# skilledge - Made with Streamlit
+﻿# skilledge - Made with Streamlit
 
 
 ###### Packages Used ######
@@ -25,7 +25,7 @@ from pdfminer3.converter import TextConverter
 from streamlit_tags import st_tags
 from PIL import Image
 # pre stored data for prediction purposes
-from Courses import ds_course,web_course,android_course,ios_course,uiux_course,resume_videos,interview_videos
+from Courses import ds_course,web_course,android_course,ios_course,uiux_course,cybersecurity_course,cloud_course,data_analyst_course,ml_ai_course,devops_course,resume_videos,interview_videos
 import nltk
 nltk.download('stopwords')
 
@@ -76,15 +76,32 @@ def show_pdf(file_path):
 
 # course recommendations which has data already loaded from Courses.py
 def course_recommender(course_list):
-    st.subheader("**Courses & Certificates Recommendations ‍**")
+    st.markdown('''
+    <div style="margin: 36px 0 20px 0;">
+        <h4 style="font-size: 1.125rem; font-weight: 600; color: #FFFFFF;">Recommended Courses</h4>
+        <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.9375rem;">Curated learning resources to boost your skills</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
     c = 0
     rec_course = []
     ## slider to choose from range 1-10
-    no_of_reco = st.slider('Choose Number of Course Recommendations:', 1, 10, 5)
+    no_of_reco = st.slider('Number of recommendations', 1, 10, 5)
     random.shuffle(course_list)
+    
     for c_name, c_link in course_list:
         c += 1
-        st.markdown(f"({c}) [{c_name}]({c_link})")
+        st.markdown(f"""
+        <a href="{c_link}" target="_blank" style="text-decoration: none; display: block; margin-bottom: 12px;">
+            <div style="background: #1C1C1E; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);" onmouseover="this.style.transform='translateX(4px)'; this.style.boxShadow='0 0 20px rgba(10, 132, 255, 0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="background: rgba(10, 132, 255, 0.2); color: #0A84FF; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">{c}</span>
+                    <span style="color: #FFFFFF !important; font-weight: 500; font-size: 0.9375rem;">{c_name}</span>
+                </div>
+                <span style="color: rgba(235, 235, 245, 0.6); font-size: 1.125rem;">&#8594;</span>
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
         rec_course.append(c_name)
         if c == no_of_reco:
             break
@@ -102,21 +119,21 @@ try:
     # First, try Streamlit secrets (for Streamlit Cloud)
     try:
         mongodb_uri = st.secrets["MONGODB_URI"]
-        print("✓ Using MongoDB URI from Streamlit secrets")
+        print(" Using MongoDB URI from Streamlit secrets")
     except Exception as secret_err:
-        print(f"✗ Streamlit secrets not found: {secret_err}")
+        print(f" Streamlit secrets not found: {secret_err}")
         pass
     
     # If not in secrets, try environment variable
     if not mongodb_uri:
         mongodb_uri = os.environ.get('MONGODB_URI')
         if mongodb_uri:
-            print("✓ Using MongoDB URI from environment variable")
+            print(" Using MongoDB URI from environment variable")
     
     # If still not found, use local MongoDB
     if not mongodb_uri:
         mongodb_uri = 'mongodb://localhost:27017/'
-        print("⚠ Using local MongoDB (localhost:27017)")
+        print(" Using local MongoDB (localhost:27017)")
     
     print(f"Attempting to connect to: {mongodb_uri[:20]}...")
     
@@ -146,14 +163,14 @@ try:
     user_collection = db['user_data']
     feedback_collection = db['user_feedback']
     DB_AVAILABLE = True
-    print("✅ MongoDB connected successfully!")
-    print(f"✅ Database: skilledge_db")
+    print(" MongoDB connected successfully!")
+    print(f" Database: skilledge_db")
 except Exception as e:
-    print(f"❌ MongoDB connection failed: {str(e)}")
-    print(f"❌ Error type: {type(e).__name__}")
+    print(f" MongoDB connection failed: {str(e)}")
+    print(f" Error type: {type(e).__name__}")
     import traceback
     print(traceback.format_exc())
-    print("⚠ Running in demo mode without database. Data will not be saved.")
+    print(" Running in demo mode without database. Data will not be saved.")
     client = None
     db = None
     user_collection = None
@@ -229,209 +246,1134 @@ if DB_AVAILABLE:
     auth_collection = db['users']
 
 
-# Custom CSS for horizontal navbar
+# Apple VisionOS-Inspired Design System CSS
 def load_css():
     st.markdown("""
     <style>
-        /* Hide default sidebar */
-        [data-testid="stSidebar"] {
-            display: none;
+        /* ============================================
+           APPLE PRO DARK MODE - macOS Sequoia / VisionOS
+           High Contrast Dark Theme
+           ============================================ */
+        
+        /* Import Inter as SF Pro alternative */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        /* ============================================
+           DESIGN TOKENS - Apple Dark Mode Colors
+           ============================================ */
+        :root {
+            /* Background Hierarchy (Depth Levels) */
+            --bg-level-0: #000000;           /* Base - Main page background */
+            --bg-level-1: #1C1C1E;           /* Cards, Bento boxes, modals */
+            --bg-level-2: #2C2C2E;           /* Inlays, inputs, nested elements */
+            --bg-level-3: #3A3A3C;           /* Elevated elements */
+            
+            /* Text Colors */
+            --text-primary: #FFFFFF;          /* Headlines, primary text */
+            --text-body: #F2F2F7;            /* Body text (slightly off-white to reduce eye strain) */
+            --text-secondary: rgba(235, 235, 245, 0.6);  /* Muted text, captions */
+            --text-tertiary: rgba(235, 235, 245, 0.3);   /* Placeholder, disabled */
+            
+            /* Dark Mode System Colors (Desaturated for dark backgrounds) */
+            --system-blue: #0A84FF;
+            --system-green: #30D158;
+            --system-indigo: #5E5CE6;
+            --system-orange: #FF9F0A;
+            --system-pink: #FF375F;
+            --system-purple: #BF5AF2;
+            --system-red: #FF453A;
+            --system-teal: #64D2FF;
+            --system-yellow: #FFD60A;
+            --system-mint: #66D4CF;
+            --system-cyan: #5AC8FA;
+            --system-graphite: #8E8E93;
+            
+            /* Glass Materials - Dark Translucent */
+            --glass-dark: rgba(28, 28, 30, 0.7);
+            --glass-medium: rgba(44, 44, 46, 0.8);
+            --glass-light: rgba(58, 58, 60, 0.6);
+            
+            /* Borders & Separators */
+            --separator: rgba(255, 255, 255, 0.1);
+            --separator-strong: rgba(255, 255, 255, 0.15);
+            --border-focused: rgba(10, 132, 255, 0.5);
+            
+            /* Fills */
+            --fill-primary: rgba(120, 120, 128, 0.36);
+            --fill-secondary: rgba(120, 120, 128, 0.32);
+            --fill-tertiary: rgba(118, 118, 128, 0.24);
+            --fill-quaternary: rgba(116, 116, 128, 0.18);
+            
+            /* Radii - Squircle-like Continuous Curves */
+            --radius-xs: 8px;
+            --radius-sm: 12px;
+            --radius-md: 18px;
+            --radius-lg: 22px;
+            --radius-xl: 28px;
+            --radius-pill: 980px;
+            
+            /* Shadows - Diffused Glow for Dark Mode */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.6);
+            --glow-blue: 0 0 20px rgba(10, 132, 255, 0.3), 0 0 40px rgba(10, 132, 255, 0.1);
+            --glow-active: 0 0 30px rgba(10, 132, 255, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+            
+            /* Transitions - Spring-loaded Feel */
+            --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --spring-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+            --duration-fast: 0.15s;
+            --duration-normal: 0.2s;
+            --duration-slow: 0.35s;
         }
         
-        /* Horizontal Navigation Bar */
+        /* ============================================
+           GLOBAL RESET & BASE STYLES
+           ============================================ */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .stApp {
+            background: var(--bg-level-0) !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* GLOBAL FIX: Hide material icon text fallbacks like "arrow_right", "arrow_down" */
+        [data-testid="stIconMaterial"] {
+            font-size: 0 !important;
+            width: 24px !important;
+            height: 24px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        [data-testid="stIconMaterial"]::before {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Hide Streamlit Branding */
+        [data-testid="stSidebar"] { display: none !important; }
+        #MainMenu, footer, header { visibility: hidden !important; height: 0 !important; }
+        .stDeployButton { display: none !important; }
+        [data-testid="stToolbar"] { display: none !important; }
+        
+        /* Main Container - Centered Content */
+        .main .block-container {
+            max-width: 1280px !important;
+            padding: 48px 32px !important;
+            margin: 0 auto !important;
+        }
+        
+        /* ============================================
+           TYPOGRAPHY - SF Pro Dynamic Type Scale
+           ============================================ */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif !important;
+            color: var(--text-primary) !important;
+            letter-spacing: -0.022em !important;
+            line-height: 1.15 !important;
+        }
+        
+        /* Large Title */
+        h1 {
+            font-size: 2.75rem !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.028em !important;
+        }
+        
+        /* Title 1 */
+        h2 {
+            font-size: 1.75rem !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Title 2 */
+        h3 {
+            font-size: 1.375rem !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Title 3 / Headline */
+        h4 {
+            font-size: 1.125rem !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Body Text - Using slightly off-white for reduced eye strain */
+        p, span, div, label, li {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif !important;
+            color: var(--text-body);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        /* Secondary/Tertiary Labels */
+        .text-secondary { color: var(--text-secondary) !important; }
+        .text-tertiary { color: var(--text-tertiary) !important; }
+        
+        /* Ensure all Streamlit text is properly colored for dark mode */
+        .stMarkdown, .stMarkdown p, .stMarkdown span, .stMarkdown div,
+        [data-testid="stMarkdownContainer"] p,
+        [data-testid="stMarkdownContainer"] span,
+        [data-testid="stText"],
+        .element-container p,
+        .element-container span,
+        .stTextInput label,
+        .stSelectbox label,
+        .stTextArea label {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Fix list items and general text */
+        ul, ol, li {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Ensure form labels are visible */
+        label {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Fix any inherit color issues */
+        .stApp {
+            color: var(--text-primary);
+        }
+        
+        /* ============================================
+           NAVIGATION BAR - Dark Glass Material
+           ============================================ */
         .navbar {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            padding: 1rem 2rem;
+            background: var(--glass-dark);
+            backdrop-filter: saturate(180%) blur(30px);
+            -webkit-backdrop-filter: saturate(180%) blur(30px);
+            padding: 14px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
-        }
-        
-        /* Dashboard Cards */
-        .dashboard-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e2e8f0;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        /* Score Card */
-        .score-card {
-            background: linear-gradient(135deg, #10b981 0%, #000 100%);
-            border-radius: 20px;
-            padding: 30px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-        }
-        
-        .score-value {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        /* Skill Tags */
-        .skill-tag {
-            display: inline-block;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            margin: 4px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .skill-tag-missing {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        
-        .skill-tag-trending {
-            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-        }
-        
-        /* Job Card */
-        .job-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            border-left: 5px solid #3b82f6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .job-card:hover {
-            transform: translateX(10px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-        }
-        
-        .job-title {
-            color: #1e3a8a;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .job-platform-btn {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin: 4px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-naukri { background: #1a1a1a; color: white; }
-        .btn-linkedin { background: #1a1a1a; color: white; }
-        .btn-indeed { background: #1a1a1a; color: white; }
-        .btn-glassdoor { background: #1a1a1a; color: white; }
-        .btn-internshala { background: #1a1a1a; color: white; }
-        
-        .job-platform-btn:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
-        }
-        
-        /* Interview Card */
-        .interview-card {
-            background: linear-gradient(145deg, #fefce8 0%, #fef3c7 100%);
-            border-radius: 16px;
-            padding: 24px;
-            border-left: 5px solid #f59e0b;
-            margin-bottom: 16px;
-        }
-        
-        /* Section Headers */
-        .section-header {
-            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, transparent 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        /* Trending Badge */
-        .trending-badge {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            margin: 0 0 32px 0;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 100;
         }
         
         .navbar-brand {
-            color: white;
             font-size: 1.5rem;
-            font-weight: bold;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .navbar-menu {
+        .navbar-brand::before {
+            content: "";
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
+            border-radius: var(--radius-sm);
+            display: inline-block;
+        }
+        
+        .navbar-nav {
             display: flex;
-            gap: 2rem;
+            gap: 8px;
             align-items: center;
         }
         
-        .nav-link {
+        .navbar-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--spring-smooth);
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        
+        .navbar-nav-btn:hover {
+            background: var(--fill-tertiary);
+        }
+        
+        .navbar-nav-btn.active {
+            background: var(--system-blue);
             color: white;
+        }
+        
+        .navbar-user {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            background: var(--bg-level-2);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            transition: all var(--duration-fast) var(--spring-smooth);
+        }
+        
+        .navbar-user:hover {
+            background: var(--bg-level-3);
+        }
+        
+        /* ============================================
+           BUTTONS - Prominent & Secondary Styles
+           ============================================ */
+        /* Prominent Button - Solid Blue with White Text */
+        .stButton > button {
+            background: var(--system-blue) !important;
+            color: var(--text-primary) !important;
+            border: none !important;
+            border-radius: var(--radius-pill) !important;
+            padding: 12px 24px !important;
+            font-size: 0.9375rem !important;
+            font-weight: 500 !important;
+            font-family: 'Inter', -apple-system, sans-serif !important;
+            letter-spacing: -0.01em !important;
+            transition: all var(--duration-fast) var(--spring-bounce) !important;
+            box-shadow: 0 4px 14px rgba(10, 132, 255, 0.4) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stButton > button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+            border-radius: var(--radius-pill) var(--radius-pill) 0 0;
+            pointer-events: none;
+        }
+        
+        .stButton > button:hover {
+            transform: scale(1.04) translateY(-1px) !important;
+            box-shadow: var(--glow-blue) !important;
+        }
+        
+        .stButton > button:active {
+            transform: scale(0.97) !important;
+            box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3) !important;
+        }
+        
+        /* Secondary Buttons - White text on Dark Gray */
+        .stButton > button[kind="secondary"],
+        [data-testid="baseButton-secondary"] {
+            background: var(--bg-level-2) !important;
+            color: var(--text-primary) !important;
+            box-shadow: none !important;
+            border: 1px solid var(--separator) !important;
+        }
+        
+        .stButton > button[kind="secondary"]:hover,
+        [data-testid="baseButton-secondary"]:hover {
+            background: var(--bg-level-3) !important;
+            transform: scale(1.02) !important;
+        }
+        
+        [data-testid="baseButton-secondary"] {
+            background: var(--bg-level-2) !important;
+            color: var(--system-blue) !important;
+            border: 1px solid var(--separator) !important;
+            box-shadow: none !important;
+        }
+        
+        [data-testid="baseButton-secondary"]:hover {
+            background: var(--bg-level-3) !important;
+            box-shadow: none !important;
+        }
+        
+        /* ============================================
+           BENTO BOX CARDS - Pro Dark Card Style
+           ============================================ */
+        .dashboard-card {
+            background: var(--bg-level-1);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 20px;
+            transition: all var(--duration-normal) var(--spring-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            opacity: 0.8;
+        }
+        
+        .dashboard-card:hover {
+            transform: scale(1.02);
+            background: var(--bg-level-2);
+            box-shadow: var(--glow-active);
+            border-color: var(--border-focused);
+        }
+        
+        /* Card Text Colors - White for dark mode */
+        .dashboard-card h2, .dashboard-card h3, .dashboard-card h4,
+        .dashboard-card p, .dashboard-card span, .dashboard-card li {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Glass Card Variant - Dark Translucent */
+        .glass-card {
+            background: var(--glass-dark);
+            backdrop-filter: saturate(180%) blur(30px);
+            -webkit-backdrop-filter: saturate(180%) blur(30px);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ============================================
+           SCORE CARDS - Uniform Dark Grey Style
+           ============================================ */
+        .score-card {
+            border-radius: var(--radius-lg);
+            padding: 28px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+            background: var(--bg-level-2);
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-md);
+            transition: all var(--duration-normal) var(--spring-bounce);
+        }
+        
+        .score-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .score-card:hover {
+            transform: scale(1.02) translateY(-2px);
+            box-shadow: var(--glow-blue);
+            border-color: rgba(10, 132, 255, 0.3);
+        }
+        
+        /* All card variants now use the same dark style */
+        .score-card.blue, 
+        .score-card.green, 
+        .score-card.orange, 
+        .score-card.purple,
+        .score-card.teal,
+        .score-card.pink,
+        .score-card.indigo { 
+            background: var(--bg-level-2);
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 8px 0;
+            letter-spacing: -0.03em;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        }
+        
+        .score-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        
+        /* ============================================
+           JOB CARDS - Dark Mode Style
+           ============================================ */
+        .job-card {
+            background: var(--bg-level-1);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 16px;
+            transition: all var(--duration-normal) var(--spring-smooth);
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .job-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--system-blue) 0%, var(--system-cyan) 100%);
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        }
+        
+        .job-card:hover {
+            transform: translateX(4px) translateY(-2px);
+            background: var(--bg-level-2);
+            box-shadow: var(--glow-active);
+            border-color: var(--border-focused);
+        }
+        
+        .job-card h3 {
+            color: var(--text-primary) !important;
+            font-size: 1.125rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .job-card p, .job-card span {
+            color: var(--text-body) !important;
+        }
+        
+        .job-platform-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: var(--radius-pill);
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            margin: 4px;
+            transition: all var(--duration-fast) var(--spring-bounce);
+            background: var(--text-primary);
+            color: var(--bg-level-0);
         }
         
-        .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .job-platform-btn:hover {
+            transform: scale(1.06) translateY(-1px);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
         }
         
-        /* Make file uploader bigger */
+        /* ============================================
+           FILE UPLOADER - Dark Drop Zone
+           ============================================ */
         [data-testid="stFileUploader"] {
-            padding: 3rem;
-            border: 3px dashed #1e3a8a;
-            border-radius: 12px;
-            background-color: #f8fafc;
-            min-height: 250px;
+            padding: 56px 32px;
+            border: 2px dashed var(--separator-strong) !important;
+            border-radius: var(--radius-xl);
+            background: var(--bg-level-1) !important;
+            min-height: 220px;
+            transition: all var(--duration-normal) var(--spring-smooth);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+        
+        [data-testid="stFileUploader"]::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-xl);
+            padding: 2px;
+            background: linear-gradient(135deg, var(--system-blue), var(--system-purple), var(--system-pink));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity var(--duration-normal) var(--spring-smooth);
+            pointer-events: none;
+        }
+        
+        [data-testid="stFileUploader"]:hover {
+            border-color: transparent !important;
+            box-shadow: var(--glow-blue);
+            transform: translateY(-2px);
+        }
+        
+        [data-testid="stFileUploader"]:hover::before {
+            opacity: 1;
         }
         
         [data-testid="stFileUploader"] > div {
-            min-height: 200px;
+            min-height: 160px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
         
         [data-testid="stFileUploader"] label {
-            font-size: 1.2rem !important;
+            font-size: 1.0625rem !important;
+            font-weight: 500 !important;
+            color: var(--text-primary) !important;
+        }
+        
+        /* ============================================
+           INPUT FIELDS - Dark Mode Inlay Style
+           ============================================ */
+        .stTextInput > div > div > input,
+        .stTextArea > div > div > textarea {
+            background: var(--bg-level-2) !important;
+            border: 1px solid var(--separator) !important;
+            border-radius: var(--radius-sm) !important;
+            padding: 14px 18px !important;
+            font-size: 1rem !important;
+            font-family: 'Inter', -apple-system, sans-serif !important;
+            transition: all var(--duration-fast) var(--spring-smooth) !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stTextInput > div > div > input:focus,
+        .stTextArea > div > div > textarea:focus {
+            border-color: var(--system-blue) !important;
+            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+            outline: none !important;
+        }
+        
+        .stTextInput > div > div > input::placeholder,
+        .stTextArea > div > div > textarea::placeholder {
+            color: var(--text-tertiary) !important;
+            opacity: 1 !important;
+        }
+        
+        /* Password & All Input Text */
+        input, textarea, select {
+            color: var(--text-primary) !important;
+            background: var(--bg-level-2) !important;
+        }
+        
+        /* Labels */
+        .stSelectbox label, .stTextInput label, 
+        .stTextArea label, .stSlider label,
+        .stFileUploader label {
+            color: var(--text-primary) !important;
+            font-weight: 500 !important;
+            font-size: 0.9375rem !important;
+        }
+        
+        /* ============================================
+           PROGRESS BAR - Rounded Apple Style
+           ============================================ */
+        .stProgress > div > div > div > div {
+            background: linear-gradient(90deg, var(--system-blue) 0%, var(--system-cyan) 100%) !important;
+            border-radius: var(--radius-pill) !important;
+        }
+        
+        .stProgress > div > div {
+            background: var(--bg-level-2) !important;
+            border-radius: var(--radius-pill) !important;
+            height: 8px !important;
+        }
+        
+        /* ============================================
+           EXPANDERS - Dark Accordion Style
+           ============================================ */
+        .streamlit-expanderHeader {
+            background: var(--bg-level-1) !important;
+            border-radius: var(--radius-sm) !important;
+            border: 1px solid var(--separator) !important;
+            font-weight: 500 !important;
+            font-size: 0.9375rem !important;
+            padding: 16px 20px !important;
+            box-shadow: var(--shadow-sm) !important;
+            color: var(--text-primary) !important;
+            transition: all var(--duration-fast) var(--spring-smooth) !important;
+        }
+        
+        .streamlit-expanderHeader:hover {
+            background: var(--bg-level-2) !important;
+            border-color: var(--border-focused) !important;
+        }
+        
+        .streamlit-expanderHeader p,
+        .streamlit-expanderHeader span,
+        .streamlit-expanderHeader div {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Fix expander arrow icons - hide text fallbacks */
+        [data-testid="stExpander"] details summary svg {
+            stroke: var(--text-primary) !important;
+            width: 20px !important;
+            height: 20px !important;
+        }
+        
+        [data-testid="stExpander"] summary span[data-testid="stMarkdownContainer"] {
+            color: var(--text-primary) !important;
+        }
+        
+        /* Hide arrow_right and arrow_down text fallbacks */
+        [data-testid="stExpander"] summary [data-testid="stIconMaterial"],
+        [data-testid="stExpander"] summary span:has(> [data-icon]) {
+            font-size: 0 !important;
+        }
+        
+        /* Hide the literal text "arrow_right" and "arrow_down" */
+        [data-testid="stExpander"] details > summary > span:first-child {
+            font-size: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+        }
+        
+        /* Show proper arrow using ::before pseudo-element */
+        [data-testid="stExpander"] details > summary > span:first-child::before {
+            content: "\\25B6" !important;
+            font-size: 0.75rem !important;
+            color: var(--text-secondary) !important;
+            margin-right: 8px !important;
+            transition: transform 0.2s ease !important;
+        }
+        
+        [data-testid="stExpander"] details[open] > summary > span:first-child::before {
+            content: "\\25BC" !important;
+        }
+        
+        /* Alternative: Hide any span containing arrow text */
+        [data-testid="stExpander"] summary span[style*="material"] {
+            visibility: hidden !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Hide text arrows and show proper icons */
+        [data-testid="stExpander"] summary {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        
+        [data-testid="stExpander"] summary::marker,
+        [data-testid="stExpander"] summary::-webkit-details-marker {
+            display: none !important;
+        }
+        
+        .streamlit-expanderContent {
+            background: var(--bg-level-1) !important;
+            border: 1px solid var(--separator) !important;
+            border-top: none !important;
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
+            padding: 20px !important;
+        }
+        
+        .streamlit-expanderContent p,
+        .streamlit-expanderContent span,
+        .streamlit-expanderContent li {
+            color: var(--text-body) !important;
+        }
+        
+        /* ============================================
+           METRICS - Large Display Numbers
+           ============================================ */
+        [data-testid="stMetricValue"] {
+            font-size: 2.25rem !important;
+            font-weight: 700 !important;
+            color: var(--text-primary) !important;
+            letter-spacing: -0.03em !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            font-size: 0.8125rem !important;
+            color: var(--text-secondary) !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+        }
+        
+        /* ============================================
+           SLIDER - Smooth Track Style
+           ============================================ */
+        .stSlider > div > div > div > div {
+            background: var(--system-blue) !important;
+        }
+        
+        .stSlider > div > div > div {
+            background: var(--bg-level-2) !important;
+        }
+        
+        /* ============================================
+           ALERTS & NOTIFICATIONS - Dark Mode
+           ============================================ */
+        .stSuccess, .stInfo, .stWarning, .stError {
+            border-radius: var(--radius-sm) !important;
+            border: none !important;
+            padding: 16px 20px !important;
+            backdrop-filter: blur(8px) !important;
+        }
+        
+        .stSuccess {
+            background: rgba(48, 209, 88, 0.15) !important;
+            border-left: 4px solid var(--system-green) !important;
+        }
+        
+        .stSuccess p, .stSuccess span {
+            color: var(--system-green) !important;
+        }
+        
+        .stInfo {
+            background: rgba(10, 132, 255, 0.15) !important;
+            border-left: 4px solid var(--system-blue) !important;
+        }
+        
+        .stInfo p, .stInfo span {
+            color: var(--system-blue) !important;
+        }
+        
+        .stWarning {
+            background: rgba(255, 159, 10, 0.15) !important;
+            border-left: 4px solid var(--system-orange) !important;
+        }
+        
+        .stWarning p, .stWarning span {
+            color: var(--system-orange) !important;
+        }
+        
+        .stError {
+            background: rgba(255, 69, 58, 0.15) !important;
+            border-left: 4px solid var(--system-red) !important;
+        }
+        
+        .stError p, .stError span {
+            color: var(--system-red) !important;
+        }
+        
+        /* ============================================
+           SKILL TAGS - Vibrant Pills (Dark Mode)
+           ============================================ */
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(10, 132, 255, 0.2);
+            color: var(--system-blue);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            margin: 4px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: all var(--duration-fast) var(--spring-bounce);
+        }
+        
+        .skill-tag:hover {
+            background: rgba(10, 132, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .skill-tag-success {
+            background: rgba(48, 209, 88, 0.2);
+            color: var(--system-green);
+        }
+        
+        .skill-tag-warning {
+            background: rgba(255, 159, 10, 0.2);
+            color: var(--system-orange);
+        }
+        
+        .skill-tag-hot {
+            background: rgba(255, 55, 95, 0.2);
+            color: var(--system-pink);
+        }
+        
+        /* ============================================
+           HERO SECTION - Cinematic Welcome
+           ============================================ */
+        .hero-section {
+            text-align: center;
+            padding: 100px 24px 60px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.05em;
+            line-height: 1.05;
+            margin-bottom: 20px;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            line-height: 1.5;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* ============================================
+           LOGIN/SIGNUP CARDS - Dark Elevated Form
+           ============================================ */
+        .login-card {
+            background: var(--bg-level-1);
+            border-radius: var(--radius-xl);
+            padding: 48px;
+            box-shadow: var(--shadow-xl);
+            max-width: 420px;
+            margin: 0 auto;
+            border: 1px solid var(--separator);
+        }
+        
+        .login-card h2 {
+            font-size: 1.625rem !important;
+            text-align: center;
+            margin-bottom: 8px !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            margin-bottom: 36px;
+        }
+        
+        /* ============================================
+           SECTION HEADERS - Apple Style
+           ============================================ */
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            margin-bottom: 8px;
+        }
+        
+        .section-subtitle {
+            font-size: 1.0625rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 32px;
+        }
+        
+        /* ============================================
+           BENTO GRID LAYOUT
+           ============================================ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .bento-item {
+            background: var(--bg-level-1);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-md);
+            transition: all var(--duration-normal) var(--spring-smooth);
+        }
+        
+        .bento-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--glow-active);
+            background: var(--bg-level-2);
+        }
+        
+        .bento-item.large {
+            grid-column: span 2;
+        }
+        
+        /* ============================================
+           TRENDING BADGE - Animated
+           ============================================ */
+        .trending-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--system-pink) 0%, #FF6B8A 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            animation: pulse-glow 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 55, 95, 0.5); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 55, 95, 0); }
+        }
+        
+        /* ============================================
+           DATA TABLES - Dark Design
+           ============================================ */
+        .stDataFrame {
+            border-radius: var(--radius-md) !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+        
+        [data-testid="stDataFrame"] > div {
+            background: var(--bg-level-1) !important;
+        }
+        
+        /* ============================================
+           CHARTS - Container Styling
+           ============================================ */
+        .chart-container {
+            background: var(--bg-level-1);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ============================================
+           PDF VIEWER & MEDIA
+           ============================================ */
+        iframe {
+            border-radius: var(--radius-lg) !important;
+            box-shadow: var(--shadow-xl) !important;
+        }
+        
+        .stVideo > div {
+            border-radius: var(--radius-lg) !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+        
+        /* ============================================
+           RESPONSIVE BREAKPOINTS
+           ============================================ */
+        @media (max-width: 768px) {
+            :root {
+                --radius-lg: 20px;
+                --radius-xl: 24px;
+            }
+            
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.125rem; }
+            .navbar { padding: 12px 20px; }
+            .dashboard-card { padding: 20px; }
+            .login-card { padding: 32px 24px; margin: 0 16px; }
+            .score-card { padding: 24px 16px; }
+            .score-value { font-size: 2rem; }
+            
+            .main .block-container {
+                padding: 24px 16px !important;
+            }
+        }
+        
+        /* ============================================
+           SCROLLBAR - Dark Minimal Style
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-level-0);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-level-3);
+            border-radius: var(--radius-pill);
+            border: 3px solid var(--bg-level-0);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--system-graphite);
+        }
+        
+        /* ============================================
+           TAGS INPUT WIDGET
+           ============================================ */
+        [data-baseweb="tag"] {
+            background: rgba(10, 132, 255, 0.2) !important;
+            color: var(--system-blue) !important;
+            border-radius: var(--radius-pill) !important;
+            border: none !important;
+        }
+        
+        [data-baseweb="tag"] span {
+            color: var(--system-blue) !important;
+        }
+        
+        /* ============================================
+           FORM CONTAINER
+           ============================================ */
+        .stForm {
+            background: var(--bg-level-1) !important;
+            border: 1px solid var(--separator) !important;
+            border-radius: var(--radius-lg) !important;
+            padding: 28px !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+        
+        /* ============================================
+           SELECT BOX STYLING
+           ============================================ */
+        .stSelectbox > div > div {
+            background: var(--bg-level-2) !important;
+            border: 1px solid var(--separator) !important;
+            border-radius: var(--radius-sm) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stSelectbox > div > div > div {
+            color: var(--text-primary) !important;
+        }
+        
+        /* ============================================
+           ADDITIONAL TEXT FIXES
+           ============================================ */
+        [data-testid="stNotification"] p,
+        [data-testid="stNotification"] span {
+            color: inherit !important;
+        }
+        
+        .row-widget.stSelectbox label,
+        .row-widget.stTextInput label,
+        .row-widget.stTextArea label,
+        .row-widget.stSlider label,
+        .row-widget.stFileUploader label {
+            color: var(--text-primary) !important;
             font-weight: 500 !important;
         }
         
-        /* Hide Streamlit branding */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
+        [data-testid="stMetricValue"],
+        [data-testid="stMetricLabel"],
+        [data-testid="stMetricDelta"] {
+            color: var(--text-primary) !important;
+        }
+        
+        /* ============================================
+           MAIN CONTENT PADDING FIX
+           ============================================ */
+        .st-emotion-cache-zy6yx3 {
+            padding-left: 2rem;
+            padding-right: 3rem;
+            padding: 27px;
+        }
+        
     </style>
     """, unsafe_allow_html=True)
 
@@ -470,34 +1412,41 @@ def login_user(username, password):
     return False, "Invalid credentials"
 
 def render_navbar(username):
-    st.markdown(f"""
-    <div class="navbar">
-        <div class="navbar-brand">skilledge</div>
-        <div class="navbar-menu">
-            <span style="color: white;">Welcome, {username}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Get current page for active state
+    current_page = st.session_state.get('page', 'dashboard')
     
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-    with col1:
-        if st.button("Dashboard", use_container_width=True):
+    # Create columns for navigation using Streamlit buttons inside navbar area
+    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6 = st.columns([1.5, 1, 1, 1, 1, 1.5])
+    
+    with nav_col1:
+        st.markdown('<div class="navbar-brand">skilledge</div>', unsafe_allow_html=True)
+    
+    with nav_col2:
+        if st.button("Dashboard", use_container_width=True, key="nav_dashboard", type="secondary" if current_page != 'dashboard' else "primary"):
             st.session_state.page = 'dashboard'
             st.rerun()
-    with col2:
-        if st.button("About", use_container_width=True):
+    
+    with nav_col3:
+        if st.button("About", use_container_width=True, key="nav_about", type="secondary" if current_page != 'about' else "primary"):
             st.session_state.page = 'about'
             st.rerun()
-    with col3:
-        if st.button("Feedback", use_container_width=True):
+    
+    with nav_col4:
+        if st.button("Feedback", use_container_width=True, key="nav_feedback", type="secondary" if current_page != 'feedback' else "primary"):
             st.session_state.page = 'feedback'
             st.rerun()
-    with col4:
-        if st.button("Logout", use_container_width=True):
+    
+    with nav_col5:
+        if st.button("Sign Out", use_container_width=True, key="nav_logout", type="secondary"):
             st.session_state.logged_in = False
             st.session_state.username = None
             st.session_state.page = 'login'
             st.rerun()
+    
+    with nav_col6:
+        st.markdown(f'<div class="navbar-user">{username}</div>', unsafe_allow_html=True)
+    
+    st.markdown("<hr style='border: none; border-top: 1px solid var(--separator); margin: 16px 0 32px 0;'>", unsafe_allow_html=True)
 
 ###### AI-Powered Interview Questions Generator ######
 def generate_interview_questions(field, level, skills):
@@ -540,7 +1489,7 @@ def generate_interview_questions(field, level, skills):
         ],
         'Android Development': [
             {'question': 'Explain the Android Activity Lifecycle.',
-             'answer': 'Activities go through: onCreate → onStart → onResume (running) → onPause → onStop → onDestroy. Understanding this helps manage resources and handle configuration changes.',
+             'answer': 'Activities go through: onCreate  onStart  onResume (running)  onPause  onStop  onDestroy. Understanding this helps manage resources and handle configuration changes.',
              'tips': 'Discuss saving state in onSaveInstanceState and restoring in onCreate.'},
             {'question': 'What is the difference between Service and IntentService?',
              'answer': 'Service runs on the main thread and handles multiple requests. IntentService runs on a worker thread, handles one request at a time, and stops itself when done.',
@@ -557,7 +1506,7 @@ def generate_interview_questions(field, level, skills):
         ],
         'IOS Development': [
             {'question': 'Explain the iOS App Lifecycle.',
-             'answer': 'States: Not Running → Inactive → Active → Background → Suspended. AppDelegate/SceneDelegate methods handle transitions like applicationDidBecomeActive.',
+             'answer': 'States: Not Running  Inactive  Active  Background  Suspended. AppDelegate/SceneDelegate methods handle transitions like applicationDidBecomeActive.',
              'tips': 'Discuss differences between AppDelegate and SceneDelegate (iOS 13+).'},
             {'question': 'What is ARC in Swift?',
              'answer': 'ARC (Automatic Reference Counting) manages memory by tracking strong references. Objects are deallocated when reference count reaches zero. Use weak/unowned to prevent retain cycles.',
@@ -577,7 +1526,7 @@ def generate_interview_questions(field, level, skills):
              'answer': 'UX focuses on overall user experience (research, flows, usability). UI focuses on visual design (colors, typography, components). Both work together for great products.',
              'tips': 'Give examples: UX decides a checkout needs 3 steps; UI designs how each step looks.'},
             {'question': 'Explain your design process.',
-             'answer': 'Typical process: Research → Define → Ideate → Prototype → Test → Iterate. Each phase has specific deliverables like personas, user flows, wireframes, and usability reports.',
+             'answer': 'Typical process: Research  Define  Ideate  Prototype  Test  Iterate. Each phase has specific deliverables like personas, user flows, wireframes, and usability reports.',
              'tips': 'Share a specific project example walking through your process.'},
             {'question': 'How do you conduct user research?',
              'answer': 'Methods include: interviews, surveys, usability testing, A/B testing, analytics review, card sorting, and contextual inquiry. Choice depends on goals, timeline, and resources.',
@@ -588,13 +1537,98 @@ def generate_interview_questions(field, level, skills):
             {'question': 'How do you handle accessibility in design?',
              'answer': 'Follow WCAG guidelines: sufficient color contrast, keyboard navigation, screen reader support, clear focus states, alt text, and testing with assistive technologies.',
              'tips': 'Mention specific tools like axe, Lighthouse, or VoiceOver for testing.'},
+        ],
+        'Cyber Security': [
+            {'question': 'What is the CIA Triad in cybersecurity?',
+             'answer': 'CIA stands for Confidentiality (protecting data from unauthorized access), Integrity (ensuring data is accurate and unaltered), and Availability (ensuring systems are accessible when needed). These are the core principles of information security.',
+             'tips': 'Give real-world examples like encryption for confidentiality, checksums for integrity, and DDoS protection for availability.'},
+            {'question': 'Explain the difference between symmetric and asymmetric encryption.',
+             'answer': 'Symmetric encryption uses the same key for encryption and decryption (AES, DES). Asymmetric uses a public-private key pair (RSA, ECC). Symmetric is faster but has key distribution challenges; asymmetric solves this but is slower.',
+             'tips': 'Mention how HTTPS uses both: asymmetric for key exchange, symmetric for data transfer.'},
+            {'question': 'What is a penetration test and how does it differ from vulnerability assessment?',
+             'answer': 'Vulnerability assessment identifies and lists security weaknesses. Penetration testing goes further by actively exploiting vulnerabilities to assess real-world impact. Pen tests simulate actual attacks to test defenses.',
+             'tips': 'Discuss methodologies like OWASP, PTES, and the importance of scope definition.'},
+            {'question': 'How would you respond to a security incident?',
+             'answer': 'Follow incident response phases: 1) Preparation, 2) Identification, 3) Containment, 4) Eradication, 5) Recovery, 6) Lessons Learned. Document everything and communicate with stakeholders appropriately.',
+             'tips': 'Mention specific tools like SIEM, EDR, and the importance of having an incident response plan.'},
+            {'question': 'What is the OWASP Top 10 and why is it important?',
+             'answer': 'OWASP Top 10 is a list of the most critical web application security risks including injection, broken authentication, XSS, insecure deserialization, etc. It helps developers and security professionals prioritize security efforts.',
+             'tips': 'Be prepared to explain mitigation strategies for each vulnerability type.'},
+        ],
+        'Cloud Computing': [
+            {'question': 'What are the different types of cloud service models?',
+             'answer': 'IaaS (Infrastructure as a Service) provides virtualized computing resources. PaaS (Platform as a Service) provides platform for developing applications. SaaS (Software as a Service) delivers software over the internet. Examples: AWS EC2 (IaaS), Heroku (PaaS), Salesforce (SaaS).',
+             'tips': 'Explain the shared responsibility model and when to use each service type.'},
+            {'question': 'Explain the difference between horizontal and vertical scaling.',
+             'answer': 'Vertical scaling (scale up) adds more power to existing machines (CPU, RAM). Horizontal scaling (scale out) adds more machines to distribute load. Horizontal is preferred for cloud as it offers better fault tolerance and no upper limits.',
+             'tips': 'Discuss auto-scaling groups and load balancers for horizontal scaling.'},
+            {'question': 'What is Infrastructure as Code (IaC) and why is it important?',
+             'answer': 'IaC manages infrastructure through code/configuration files instead of manual processes. Tools like Terraform, CloudFormation, and Pulumi enable version control, reproducibility, and automation of infrastructure deployment.',
+             'tips': 'Mention benefits like consistency, disaster recovery, and CI/CD integration.'},
+            {'question': 'How do you ensure high availability in cloud architecture?',
+             'answer': 'Use multiple availability zones, load balancers, auto-scaling, database replication, CDN, health checks, and failover mechanisms. Design for failure with redundancy at every layer.',
+             'tips': 'Discuss specific AWS/Azure/GCP services for HA like Route 53, ALB, Multi-AZ RDS.'},
+            {'question': 'What is containerization and how does Kubernetes help?',
+             'answer': 'Containers package applications with dependencies for consistent deployment. Kubernetes orchestrates containers providing auto-scaling, self-healing, load balancing, and declarative configuration for managing containerized workloads.',
+             'tips': 'Explain pods, services, deployments, and the difference between Docker and Kubernetes.'},
+        ],
+        'Data Analyst': [
+            {'question': 'What is the difference between data analytics and data science?',
+             'answer': 'Data analytics focuses on analyzing historical data to find insights and trends using statistical methods and visualization. Data science involves building predictive models, machine learning, and creating algorithms for future predictions.',
+             'tips': 'Emphasize that analysts answer "what happened" while scientists predict "what will happen".'},
+            {'question': 'How do you handle missing data in a dataset?',
+             'answer': 'Options include: deletion (if minimal), imputation (mean/median/mode), forward/backward fill for time series, using algorithms that handle nulls, or flagging as a separate category. Choice depends on data type and business context.',
+             'tips': 'Always investigate WHY data is missing before choosing a method.'},
+            {'question': 'Explain the difference between INNER JOIN and LEFT JOIN.',
+             'answer': 'INNER JOIN returns only matching rows from both tables. LEFT JOIN returns all rows from the left table and matching rows from the right (NULL for non-matches). Understanding joins is crucial for combining data from multiple sources.',
+             'tips': 'Draw Venn diagrams to illustrate and mention performance implications.'},
+            {'question': 'How would you present complex data findings to non-technical stakeholders?',
+             'answer': 'Use clear visualizations, avoid jargon, focus on business impact, tell a story with the data, use analogies, provide actionable recommendations, and prepare for questions with supporting details.',
+             'tips': 'Mention specific tools like Tableau, Power BI, and the importance of knowing your audience.'},
+            {'question': 'What is A/B testing and how would you design one?',
+             'answer': 'A/B testing compares two versions to determine which performs better. Design includes: defining hypothesis, selecting metrics, determining sample size, ensuring random assignment, running for sufficient duration, and analyzing statistical significance.',
+             'tips': 'Discuss p-values, confidence intervals, and common pitfalls like peeking at results early.'},
+        ],
+        'Machine Learning': [
+            {'question': 'Explain the difference between supervised, unsupervised, and reinforcement learning.',
+             'answer': 'Supervised uses labeled data for prediction (classification/regression). Unsupervised finds patterns in unlabeled data (clustering/dimensionality reduction). Reinforcement learning learns through trial and error with rewards/penalties.',
+             'tips': 'Give examples: spam detection (supervised), customer segmentation (unsupervised), game AI (reinforcement).'},
+            {'question': 'What is overfitting and how do you prevent it?',
+             'answer': 'Overfitting occurs when a model learns noise in training data, performing poorly on new data. Prevention: cross-validation, regularization (L1/L2), early stopping, dropout, data augmentation, simpler models, more training data.',
+             'tips': 'Explain the bias-variance tradeoff and how to detect overfitting using validation curves.'},
+            {'question': 'Explain how a Random Forest algorithm works.',
+             'answer': 'Random Forest is an ensemble of decision trees. It uses bagging (bootstrap aggregating) and random feature selection to build multiple trees, then aggregates predictions through voting (classification) or averaging (regression).',
+             'tips': 'Discuss advantages: handles non-linearity, feature importance, resistant to overfitting.'},
+            {'question': 'What is the difference between precision and recall?',
+             'answer': 'Precision = TP/(TP+FP) measures accuracy of positive predictions. Recall = TP/(TP+FN) measures how many actual positives were found. Trade-off depends on use case: medical diagnosis needs high recall, spam filter needs high precision.',
+             'tips': 'Explain F1-score as harmonic mean and when to use each metric.'},
+            {'question': 'How do you deploy a machine learning model to production?',
+             'answer': 'Steps include: model serialization (pickle/ONNX), creating API endpoints (Flask/FastAPI), containerization (Docker), cloud deployment (AWS SageMaker/GCP AI Platform), monitoring, versioning, and setting up retraining pipelines.',
+             'tips': 'Discuss MLOps practices, model monitoring, and handling data drift.'},
+        ],
+        'DevOps': [
+            {'question': 'What is CI/CD and why is it important?',
+             'answer': 'CI (Continuous Integration) automatically builds and tests code changes. CD (Continuous Delivery/Deployment) automates release process. Benefits: faster releases, early bug detection, consistent deployments, reduced manual errors.',
+             'tips': 'Mention tools like Jenkins, GitLab CI, GitHub Actions, and discuss pipeline stages.'},
+            {'question': 'Explain the difference between Docker and Kubernetes.',
+             'answer': 'Docker is a containerization platform for packaging applications. Kubernetes is an orchestration platform for managing containers at scale. Docker creates containers; Kubernetes manages, scales, and networks multiple containers across clusters.',
+             'tips': 'Discuss when you need Kubernetes vs just Docker Compose.'},
+            {'question': 'What is Infrastructure as Code and which tools have you used?',
+             'answer': 'IaC manages infrastructure through code files enabling version control, reproducibility, and automation. Tools: Terraform (multi-cloud), CloudFormation (AWS), Ansible (configuration), Pulumi (programming languages).',
+             'tips': 'Discuss declarative vs imperative approaches and state management.'},
+            {'question': 'How do you monitor applications in production?',
+             'answer': 'Use metrics (Prometheus), logging (ELK Stack), tracing (Jaeger), and alerting (PagerDuty). Monitor: application performance, infrastructure health, business metrics. Implement dashboards (Grafana) and set up meaningful alerts.',
+             'tips': 'Discuss the four golden signals: latency, traffic, errors, saturation.'},
+            {'question': 'Explain blue-green and canary deployment strategies.',
+             'answer': 'Blue-green maintains two identical environments, switching traffic between them for zero-downtime deployments. Canary gradually routes traffic to new version (1%, 10%, 50%, 100%), allowing early detection of issues.',
+             'tips': 'Discuss rollback strategies and when to use each approach.'},
         ]
     }
     
     # Get questions for the field or return general questions
     field_questions = questions_db.get(field, [
         {'question': 'Tell me about yourself and your background.',
-         'answer': 'Structure: Present (current role/skills) → Past (relevant experience) → Future (career goals aligned with position). Keep it 2-3 minutes.',
+         'answer': 'Structure: Present (current role/skills)  Past (relevant experience)  Future (career goals aligned with position). Keep it 2-3 minutes.',
          'tips': 'Tailor to the job; focus on relevant achievements.'},
         {'question': 'What are your greatest strengths?',
          'answer': 'Choose 2-3 strengths relevant to the role. Provide specific examples demonstrating each strength with measurable results.',
@@ -657,8 +1691,8 @@ def detect_experience_level(resume_text, no_of_pages=1):
     # 2. Find date ranges (WORK history only, excluding education)
     # Pattern: "2020 - 2024", "Jan 2020 - Present", "2019-present"
     date_range_patterns = [
-        r'(20\d{2})\s*[-–—to]+\s*(20\d{2}|present|current|ongoing|now)',
-        r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2})\s*[-–—to]+\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2}|present|current|ongoing|now)',
+        r'(20\d{2})\s*[-to]+\s*(20\d{2}|present|current|ongoing|now)',
+        r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2})\s*[-to]+\s*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*20\d{2}|present|current|ongoing|now)',
     ]
     
     # Education keywords to exclude date ranges near these
@@ -720,8 +1754,8 @@ def detect_experience_level(resume_text, no_of_pages=1):
     # 3. Find graduation year
     grad_patterns = [
         r'(?:graduated?|graduation|batch\s*of|class\s*of|passed\s*out)\s*:?\s*(20\d{2})',
-        r'(20\d{2})\s*[-–]\s*(20\d{2})\s*(?:b\.?tech|b\.?e|b\.?sc|m\.?tech|m\.?sc|mba|bca|mca)',
-        r'(?:b\.?tech|b\.?e|b\.?sc|bca)\s*[-–(]?\s*(20\d{2})',
+        r'(20\d{2})\s*[-]\s*(20\d{2})\s*(?:b\.?tech|b\.?e|b\.?sc|m\.?tech|m\.?sc|mba|bca|mca)',
+        r'(?:b\.?tech|b\.?e|b\.?sc|bca)\s*[-(]?\s*(20\d{2})',
     ]
     
     for pattern in grad_patterns:
@@ -822,82 +1856,167 @@ def generate_job_recommendations(field, level, skills):
     
     jobs_db = {
         'Data Science': [
-            {'title': 'Data Scientist', 'level': 'Mid-Senior', 'salary': '₹12 - ₹25 LPA',
+            {'title': 'Data Scientist', 'level': 'Mid-Senior', 'salary': '12 - 25 LPA',
              'skills': ['Python', 'Machine Learning', 'SQL', 'Statistics', 'TensorFlow'],
              'description': 'Analyze complex data sets to drive business decisions and build predictive models.'},
-            {'title': 'Machine Learning Engineer', 'level': 'Mid-Senior', 'salary': '₹15 - ₹30 LPA',
+            {'title': 'Machine Learning Engineer', 'level': 'Mid-Senior', 'salary': '15 - 30 LPA',
              'skills': ['Python', 'TensorFlow', 'PyTorch', 'MLOps', 'Cloud'],
              'description': 'Design and deploy ML models at scale in production environments.'},
-            {'title': 'Data Analyst', 'level': 'Fresher-Entry', 'salary': '₹4 - ₹8 LPA',
+            {'title': 'Data Analyst', 'level': 'Fresher-Entry', 'salary': '4 - 8 LPA',
              'skills': ['SQL', 'Excel', 'Tableau', 'Python', 'Statistics'],
              'description': 'Transform data into actionable insights through analysis and visualization.'},
-            {'title': 'Junior Data Scientist', 'level': 'Fresher', 'salary': '₹5 - ₹12 LPA',
+            {'title': 'Junior Data Scientist', 'level': 'Fresher', 'salary': '5 - 12 LPA',
              'skills': ['Python', 'SQL', 'Statistics', 'Pandas', 'Machine Learning'],
              'description': 'Assist in building ML models and performing data analysis under senior guidance.'},
         ],
         'Web Development': [
-            {'title': 'Frontend Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+            {'title': 'Frontend Developer', 'level': 'Fresher-Entry', 'salary': '3 - 8 LPA',
              'skills': ['React', 'JavaScript', 'HTML', 'CSS', 'TypeScript'],
              'description': 'Build responsive and interactive user interfaces for web applications.'},
-            {'title': 'Full Stack Developer', 'level': 'Mid-Senior', 'salary': '₹8 - ₹20 LPA',
+            {'title': 'Full Stack Developer', 'level': 'Mid-Senior', 'salary': '8 - 20 LPA',
              'skills': ['React', 'Node.js', 'Python', 'SQL', 'AWS'],
              'description': 'Develop both frontend and backend components of web applications.'},
-            {'title': 'Backend Developer', 'level': 'Entry-Mid', 'salary': '₹5 - ₹15 LPA',
+            {'title': 'Backend Developer', 'level': 'Entry-Mid', 'salary': '5 - 15 LPA',
              'skills': ['Node.js', 'Python', 'SQL', 'APIs', 'Docker'],
              'description': 'Design and implement server-side logic and database architecture.'},
-            {'title': 'Junior Web Developer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+            {'title': 'Junior Web Developer', 'level': 'Fresher', 'salary': '2.5 - 6 LPA',
              'skills': ['HTML', 'CSS', 'JavaScript', 'React', 'Git'],
              'description': 'Develop and maintain websites under guidance of senior developers.'},
         ],
         'Android Development': [
-            {'title': 'Android Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+            {'title': 'Android Developer', 'level': 'Fresher-Entry', 'salary': '3 - 8 LPA',
              'skills': ['Kotlin', 'Android SDK', 'Jetpack', 'REST APIs', 'Git'],
              'description': 'Build native Android applications with modern architecture patterns.'},
-            {'title': 'Mobile App Developer', 'level': 'Mid-Senior', 'salary': '₹8 - ₹18 LPA',
+            {'title': 'Mobile App Developer', 'level': 'Mid-Senior', 'salary': '8 - 18 LPA',
              'skills': ['Flutter', 'Kotlin', 'Swift', 'Firebase', 'REST APIs'],
              'description': 'Develop cross-platform mobile applications for Android and iOS.'},
-            {'title': 'Junior Android Developer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+            {'title': 'Junior Android Developer', 'level': 'Fresher', 'salary': '2.5 - 6 LPA',
              'skills': ['Java', 'Kotlin', 'Android SDK', 'XML', 'Git'],
              'description': 'Develop and maintain Android apps under senior developer guidance.'},
-            {'title': 'Flutter Developer', 'level': 'Entry-Mid', 'salary': '₹4 - ₹12 LPA',
+            {'title': 'Flutter Developer', 'level': 'Entry-Mid', 'salary': '4 - 12 LPA',
              'skills': ['Flutter', 'Dart', 'Firebase', 'REST APIs', 'Git'],
              'description': 'Build cross-platform mobile apps using Flutter framework.'},
         ],
         'IOS Development': [
-            {'title': 'iOS Developer', 'level': 'Fresher-Entry', 'salary': '₹3.5 - ₹10 LPA',
+            {'title': 'iOS Developer', 'level': 'Fresher-Entry', 'salary': '3.5 - 10 LPA',
              'skills': ['Swift', 'UIKit', 'SwiftUI', 'Core Data', 'REST APIs'],
              'description': 'Build native iOS applications for iPhone and iPad.'},
-            {'title': 'Senior iOS Engineer', 'level': 'Senior', 'salary': '₹15 - ₹30 LPA',
+            {'title': 'Senior iOS Engineer', 'level': 'Senior', 'salary': '15 - 30 LPA',
              'skills': ['Swift', 'Architecture', 'Performance', 'Testing', 'Leadership'],
              'description': 'Lead iOS development and mentor junior developers.'},
-            {'title': 'Junior iOS Developer', 'level': 'Fresher', 'salary': '₹3 - ₹7 LPA',
+            {'title': 'Junior iOS Developer', 'level': 'Fresher', 'salary': '3 - 7 LPA',
              'skills': ['Swift', 'UIKit', 'Xcode', 'Git', 'REST APIs'],
              'description': 'Develop iOS apps and learn best practices under senior guidance.'},
-            {'title': 'React Native Developer', 'level': 'Entry-Mid', 'salary': '₹4 - ₹12 LPA',
+            {'title': 'React Native Developer', 'level': 'Entry-Mid', 'salary': '4 - 12 LPA',
              'skills': ['React Native', 'JavaScript', 'iOS', 'Android', 'Redux'],
              'description': 'Build cross-platform mobile apps using React Native.'},
         ],
         'UI-UX Development': [
-            {'title': 'UI/UX Designer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+            {'title': 'UI/UX Designer', 'level': 'Fresher-Entry', 'salary': '3 - 8 LPA',
              'skills': ['Figma', 'Adobe XD', 'Prototyping', 'User Research', 'Wireframing'],
              'description': 'Design intuitive and visually appealing user interfaces.'},
-            {'title': 'Product Designer', 'level': 'Mid-Senior', 'salary': '₹10 - ₹22 LPA',
+            {'title': 'Product Designer', 'level': 'Mid-Senior', 'salary': '10 - 22 LPA',
              'skills': ['Figma', 'User Research', 'Design Systems', 'Prototyping', 'Strategy'],
              'description': 'Lead end-to-end product design from research to implementation.'},
-            {'title': 'Junior UI Designer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+            {'title': 'Junior UI Designer', 'level': 'Fresher', 'salary': '2.5 - 6 LPA',
              'skills': ['Figma', 'Adobe XD', 'Photoshop', 'Wireframing', 'Visual Design'],
              'description': 'Create visual designs and UI components under senior guidance.'},
-            {'title': 'UX Researcher', 'level': 'Entry-Mid', 'salary': '₹5 - ₹15 LPA',
+            {'title': 'UX Researcher', 'level': 'Entry-Mid', 'salary': '5 - 15 LPA',
              'skills': ['User Research', 'Usability Testing', 'Data Analysis', 'Interviewing', 'Surveys'],
              'description': 'Conduct user research to inform product decisions.'},
+        ],
+        'Cyber Security': [
+            {'title': 'Security Analyst', 'level': 'Fresher-Entry', 'salary': '4 - 10 LPA',
+             'skills': ['SIEM', 'Network Security', 'Incident Response', 'Vulnerability Assessment', 'Linux'],
+             'description': 'Monitor and analyze security threats and incidents to protect organizational assets.'},
+            {'title': 'Penetration Tester', 'level': 'Entry-Mid', 'salary': '6 - 15 LPA',
+             'skills': ['Kali Linux', 'Metasploit', 'Burp Suite', 'Python', 'OWASP'],
+             'description': 'Conduct authorized simulated attacks to identify security vulnerabilities.'},
+            {'title': 'Security Engineer', 'level': 'Mid-Senior', 'salary': '12 - 25 LPA',
+             'skills': ['Cloud Security', 'DevSecOps', 'Firewall', 'IAM', 'Encryption'],
+             'description': 'Design and implement security solutions and infrastructure.'},
+            {'title': 'SOC Analyst', 'level': 'Fresher', 'salary': '3.5 - 8 LPA',
+             'skills': ['SIEM', 'Log Analysis', 'Threat Detection', 'Incident Response', 'Networking'],
+             'description': 'Monitor security operations center and respond to security events.'},
+            {'title': 'Cybersecurity Consultant', 'level': 'Senior', 'salary': '18 - 35 LPA',
+             'skills': ['Risk Assessment', 'Compliance', 'Security Architecture', 'Leadership', 'Communication'],
+             'description': 'Advise organizations on security strategy and best practices.'},
+        ],
+        'Cloud Computing': [
+            {'title': 'Cloud Engineer', 'level': 'Fresher-Entry', 'salary': '5 - 12 LPA',
+             'skills': ['AWS', 'Azure', 'Linux', 'Networking', 'Python'],
+             'description': 'Deploy and manage cloud infrastructure and services.'},
+            {'title': 'DevOps Engineer', 'level': 'Entry-Mid', 'salary': '8 - 18 LPA',
+             'skills': ['CI/CD', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins'],
+             'description': 'Build and maintain CI/CD pipelines and automate infrastructure.'},
+            {'title': 'Cloud Architect', 'level': 'Senior', 'salary': '20 - 40 LPA',
+             'skills': ['Cloud Architecture', 'Multi-cloud', 'Security', 'Cost Optimization', 'Leadership'],
+             'description': 'Design scalable, secure, and cost-effective cloud solutions.'},
+            {'title': 'Site Reliability Engineer', 'level': 'Mid-Senior', 'salary': '15 - 30 LPA',
+             'skills': ['Kubernetes', 'Monitoring', 'Automation', 'Incident Management', 'Python'],
+             'description': 'Ensure reliability and performance of large-scale distributed systems.'},
+            {'title': 'Cloud Administrator', 'level': 'Fresher', 'salary': '3.5 - 8 LPA',
+             'skills': ['AWS', 'Azure', 'Linux', 'Networking', 'Monitoring'],
+             'description': 'Manage and monitor cloud resources and services.'},
+        ],
+        'Data Analyst': [
+            {'title': 'Data Analyst', 'level': 'Fresher-Entry', 'salary': '4 - 10 LPA',
+             'skills': ['SQL', 'Excel', 'Python', 'Tableau', 'Statistics'],
+             'description': 'Analyze data to provide actionable business insights.'},
+            {'title': 'Business Intelligence Analyst', 'level': 'Entry-Mid', 'salary': '6 - 15 LPA',
+             'skills': ['Power BI', 'SQL', 'Data Modeling', 'ETL', 'Reporting'],
+             'description': 'Create dashboards and reports for business decision-making.'},
+            {'title': 'Senior Data Analyst', 'level': 'Mid-Senior', 'salary': '12 - 22 LPA',
+             'skills': ['Python', 'SQL', 'Statistical Analysis', 'Leadership', 'Stakeholder Management'],
+             'description': 'Lead analytics projects and mentor junior analysts.'},
+            {'title': 'Analytics Consultant', 'level': 'Senior', 'salary': '18 - 30 LPA',
+             'skills': ['Analytics Strategy', 'Data Visualization', 'Communication', 'Domain Expertise'],
+             'description': 'Advise organizations on data-driven decision making.'},
+            {'title': 'Junior Data Analyst', 'level': 'Fresher', 'salary': '3 - 6 LPA',
+             'skills': ['SQL', 'Excel', 'Basic Python', 'Data Cleaning', 'Reporting'],
+             'description': 'Support data analysis tasks under senior guidance.'},
+        ],
+        'Machine Learning': [
+            {'title': 'Machine Learning Engineer', 'level': 'Entry-Mid', 'salary': '8 - 20 LPA',
+             'skills': ['Python', 'TensorFlow', 'PyTorch', 'MLOps', 'SQL'],
+             'description': 'Build and deploy machine learning models at scale.'},
+            {'title': 'AI Engineer', 'level': 'Mid-Senior', 'salary': '15 - 30 LPA',
+             'skills': ['Deep Learning', 'NLP', 'Computer Vision', 'LLMs', 'Cloud'],
+             'description': 'Develop AI-powered applications and solutions.'},
+            {'title': 'ML Research Scientist', 'level': 'Senior', 'salary': '25 - 50 LPA',
+             'skills': ['Research', 'Publications', 'Mathematics', 'Novel Algorithms', 'PhD'],
+             'description': 'Conduct cutting-edge ML research and publish findings.'},
+            {'title': 'Junior ML Engineer', 'level': 'Fresher', 'salary': '5 - 10 LPA',
+             'skills': ['Python', 'Scikit-learn', 'Pandas', 'Mathematics', 'SQL'],
+             'description': 'Assist in building ML pipelines and model development.'},
+            {'title': 'MLOps Engineer', 'level': 'Mid-Senior', 'salary': '12 - 25 LPA',
+             'skills': ['MLflow', 'Kubernetes', 'CI/CD', 'Model Monitoring', 'Cloud'],
+             'description': 'Build infrastructure for ML model deployment and monitoring.'},
+        ],
+        'DevOps': [
+            {'title': 'DevOps Engineer', 'level': 'Fresher-Entry', 'salary': '5 - 12 LPA',
+             'skills': ['Linux', 'Docker', 'CI/CD', 'Git', 'Scripting'],
+             'description': 'Automate development and deployment processes.'},
+            {'title': 'Senior DevOps Engineer', 'level': 'Mid-Senior', 'salary': '15 - 28 LPA',
+             'skills': ['Kubernetes', 'Terraform', 'AWS', 'Security', 'Architecture'],
+             'description': 'Design and implement DevOps strategies and infrastructure.'},
+            {'title': 'Platform Engineer', 'level': 'Mid-Senior', 'salary': '18 - 35 LPA',
+             'skills': ['Kubernetes', 'Platform Design', 'Developer Experience', 'Automation'],
+             'description': 'Build internal platforms to improve developer productivity.'},
+            {'title': 'Release Engineer', 'level': 'Entry-Mid', 'salary': '6 - 14 LPA',
+             'skills': ['CI/CD', 'Release Management', 'Automation', 'Git', 'Scripting'],
+             'description': 'Manage software releases and deployment pipelines.'},
+            {'title': 'Build Engineer', 'level': 'Fresher', 'salary': '4 - 8 LPA',
+             'skills': ['CI/CD', 'Build Tools', 'Git', 'Linux', 'Scripting'],
+             'description': 'Maintain build systems and automate build processes.'},
         ]
     }
     
     return jobs_db.get(field, [
-        {'title': 'Software Developer', 'level': 'Fresher-Entry', 'salary': '₹3 - ₹8 LPA',
+        {'title': 'Software Developer', 'level': 'Fresher-Entry', 'salary': '3 - 8 LPA',
          'skills': ['Programming', 'Problem Solving', 'Git', 'Agile', 'Communication'],
          'description': 'Develop software solutions to meet business requirements.'},
-        {'title': 'Junior Software Engineer', 'level': 'Fresher', 'salary': '₹2.5 - ₹6 LPA',
+        {'title': 'Junior Software Engineer', 'level': 'Fresher', 'salary': '2.5 - 6 LPA',
          'skills': ['Programming', 'Data Structures', 'Git', 'Problem Solving', 'Communication'],
          'description': 'Write and maintain code under guidance of senior engineers.'},
     ])
@@ -932,6 +2051,31 @@ def get_trending_skills(field):
             'hot': ['AI Design Tools', 'Figma Dev Mode', 'Design Systems', 'Motion Design', 'AR/VR UX'],
             'growing': ['Design Tokens', 'Variable Fonts', 'Micro-interactions', '3D Design', 'Voice UI'],
             'essential': ['Figma', 'User Research', 'Prototyping', 'Accessibility', 'Design Thinking']
+        },
+        'Cyber Security': {
+            'hot': ['AI Security', 'Zero Trust Architecture', 'Cloud Security', 'XDR', 'Threat Intelligence'],
+            'growing': ['DevSecOps', 'Container Security', 'API Security', 'SOAR', 'Identity Governance'],
+            'essential': ['SIEM', 'Penetration Testing', 'Network Security', 'Incident Response', 'Compliance']
+        },
+        'Cloud Computing': {
+            'hot': ['FinOps', 'Platform Engineering', 'GitOps', 'Serverless', 'AI/ML Cloud Services'],
+            'growing': ['Multi-cloud', 'Cloud Native', 'Service Mesh', 'Observability', 'Edge Computing'],
+            'essential': ['AWS', 'Azure', 'Kubernetes', 'Terraform', 'Docker']
+        },
+        'Data Analyst': {
+            'hot': ['AI-Assisted Analytics', 'Real-time Analytics', 'Data Storytelling', 'Product Analytics'],
+            'growing': ['dbt', 'Looker', 'DataOps', 'Reverse ETL', 'Metrics Layer'],
+            'essential': ['SQL', 'Python', 'Tableau/Power BI', 'Excel', 'Statistics']
+        },
+        'Machine Learning': {
+            'hot': ['LLMs', 'Generative AI', 'RAG', 'Fine-tuning', 'Prompt Engineering'],
+            'growing': ['MLOps', 'AutoML', 'Edge ML', 'Federated Learning', 'Responsible AI'],
+            'essential': ['Python', 'TensorFlow/PyTorch', 'Scikit-learn', 'SQL', 'Mathematics']
+        },
+        'DevOps': {
+            'hot': ['Platform Engineering', 'GitOps', 'FinOps', 'AI for DevOps', 'Internal Developer Platforms'],
+            'growing': ['eBPF', 'Service Mesh', 'Policy as Code', 'Backstage', 'Crossplane'],
+            'essential': ['Kubernetes', 'Docker', 'Terraform', 'CI/CD', 'Linux']
         }
     }
     
@@ -1054,7 +2198,7 @@ def run():
     
     # If database is not available, skip authentication
     if not DB_AVAILABLE:
-        st.warning("⚠️ Running in demo mode - Database unavailable. Authentication and data saving are disabled.")
+        st.warning("Running in demo mode - Database unavailable. Authentication and data saving are disabled.")
         st.session_state.logged_in = True
         st.session_state.username = "Demo User"
         if st.session_state.page in ['login', 'signup']:
@@ -1079,68 +2223,111 @@ def run():
             show_feedback()
 
 def show_login_page():
-    st.markdown("<h1 style='text-align: center;'>skilledge</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center;'>Login to Your Account</h3>", unsafe_allow_html=True)
+    # Hero section with Apple-style branding
+    st.markdown("""
+    <div class="hero-section">
+        <div class="hero-title">
+            <span class="hero-gradient">skilledge</span>
+        </div>
+        <div class="hero-subtitle">AI-powered resume analysis.<br>Elevate your career.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Centered login card
+    col1, col2, col3 = st.columns([1, 1.5, 1])
     with col2:
-        username = st.text_input("Username", key="login_username")
-        password = st.text_input("Password", type="password", key="login_password")
+        st.markdown("""
+        <div style='text-align: center; margin-bottom: 36px;'>
+            <h2 style='margin-bottom: 8px; font-size: 1.625rem; color: #FFFFFF;'>Welcome back</h2>
+            <p style='color: rgba(235, 235, 245, 0.6); font-size: 1rem;'>Sign in to continue to your dashboard</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        col_a, col_b = st.columns(2)
-        with col_a:
-            if st.button("Login", use_container_width=True, key="login_button"):
-                if username and password:
-                    success, message = login_user(username, password)
+        username = st.text_input("Username", key="login_username", placeholder="Enter your username")
+        password = st.text_input("Password", type="password", key="login_password", placeholder="Enter your password")
+        
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+        
+        if st.button("Sign In", use_container_width=True, key="login_button"):
+            if username and password:
+                success, message = login_user(username, password)
+                if success:
+                    st.session_state.logged_in = True
+                    st.session_state.username = username
+                    st.session_state.page = 'dashboard'
+                    st.success(message)
+                    st.rerun()
+                else:
+                    st.error(message)
+            else:
+                st.warning("Please fill in all fields")
+        
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='text-align: center; color: rgba(235, 235, 245, 0.6); font-size: 0.9375rem;'>Don't have an account?
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Create Account", use_container_width=True, key="create_account_button", type="secondary"):
+            st.session_state.page = 'signup'
+            st.rerun()
+
+def show_signup_page():
+    # Hero section
+    st.markdown("""
+    <div class="hero-section" style="padding: 60px 24px 40px;">
+        <div class="hero-title" style="font-size: 2.75rem;">Join <span class="hero-gradient">skilledge</span>
+        </div>
+        <div class="hero-subtitle" style="font-size: 1.25rem;">Create your account and start your journey
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Centered signup card
+    col1, col2, col3 = st.columns([1, 1.5, 1])
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; margin-bottom: 28px;'>
+            <h3 style='margin-bottom: 8px; font-size: 1.375rem; color: #FFFFFF;'>Create your account</h3>
+            <p style='color: rgba(235, 235, 245, 0.6); font-size: 0.9375rem;'>Fill in your details to get started</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        username = st.text_input("Username", key="signup_username", placeholder="Choose a username")
+        email = st.text_input("Email", key="signup_email", placeholder="your@email.com")
+        password = st.text_input("Password", type="password", key="signup_password", placeholder="Create a password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm_password", placeholder="Confirm your password")
+        
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+        
+        if st.button("Create Account", use_container_width=True, key="signup_button"):
+            if username and email and password and confirm_password:
+                if password == confirm_password:
+                    success, message = signup_user(username, email, password)
                     if success:
-                        st.session_state.logged_in = True
-                        st.session_state.username = username
-                        st.session_state.page = 'dashboard'
                         st.success(message)
+                        time.sleep(1)
+                        st.session_state.page = 'login'
                         st.rerun()
                     else:
                         st.error(message)
                 else:
-                    st.warning("Please fill in all fields")
+                    st.error("Passwords do not match")
+            else:
+                st.warning("Please fill in all fields")
         
-        with col_b:
-            if st.button("Create Account", use_container_width=True, key="create_account_button"):
-                st.session_state.page = 'signup'
-                st.rerun()
-
-def show_signup_page():
-    st.markdown("<h1 style='text-align: center;'>skilledge</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center;'>Create New Account</h3>", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        username = st.text_input("Username", key="signup_username")
-        email = st.text_input("Email", key="signup_email")
-        password = st.text_input("Password", type="password", key="signup_password")
-        confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm_password")
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
         
-        col_a, col_b = st.columns(2)
-        with col_a:
-            if st.button("Sign Up", use_container_width=True, key="signup_button"):
-                if username and email and password and confirm_password:
-                    if password == confirm_password:
-                        success, message = signup_user(username, email, password)
-                        if success:
-                            st.success(message)
-                            time.sleep(1)
-                            st.session_state.page = 'login'
-                            st.rerun()
-                        else:
-                            st.error(message)
-                    else:
-                        st.error("Passwords do not match")
-                else:
-                    st.warning("Please fill in all fields")
+        st.markdown("""
+        <div style='text-align: center; color: rgba(235, 235, 245, 0.6); font-size: 0.9375rem;'>Already have an account?
+        </div>
+        """, unsafe_allow_html=True)
         
-        with col_b:
-            if st.button("Back to Login", use_container_width=True, key="back_to_login_button"):
-                st.session_state.page = 'login'
-                st.rerun()
+        if st.button("Sign In Instead", use_container_width=True, key="back_to_login_button", type="secondary"):
+            st.session_state.page = 'login'
+            st.rerun()
 
 def show_dashboard():
         
@@ -1176,17 +2363,23 @@ def show_dashboard():
             country = 'Unknown'
 
 
-        # Upload Resume - Larger upload area
-        st.markdown('''<h2 style='text-align: center; color: #021659; margin-bottom: 30px;'>Upload Your Resume</h2>''',unsafe_allow_html=True)
-        st.markdown('''<h4 style='text-align: center; color: #555;'>Get Smart Recommendations and Insights</h4>''',unsafe_allow_html=True)
+        # Upload Resume - Apple Pro Dark Mode design
+        st.markdown('''
+        <div style="text-align: center; padding: 48px 0 32px 0;">
+            <h1 style="font-size: 2.75rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.03em; margin-bottom: 16px;">Upload Your Resume
+            </h1>
+            <p style="font-size: 1.125rem; color: rgba(235, 235, 245, 0.6); font-weight: 400; max-width: 520px; margin: 0 auto; line-height: 1.5;">Get AI-powered insights, skill recommendations, and personalized career guidance
+            </p>
+        </div>
+        ''',unsafe_allow_html=True)
         
         # Create centered columns for better layout
-        col1, col2, col3 = st.columns([1, 3, 1])
+        col1, col2, col3 = st.columns([0.5, 3, 0.5])
         with col2:
             ## file upload in pdf format with larger area
-            pdf_file = st.file_uploader("Upload Resume", type=["pdf"], help="Upload your resume in PDF format", label_visibility="collapsed")
+            pdf_file = st.file_uploader("Drop your PDF here or click to browse", type=["pdf"], help="Upload your resume in PDF format", label_visibility="visible")
         if pdf_file is not None:
-            with st.spinner('Hang On While We Cook Magic For You...'):
+            with st.spinner(' Analyzing your resume...'):
                 time.sleep(4)
         
             ### Create Uploaded_Resumes directory if it doesn't exist
@@ -1377,7 +2570,7 @@ def show_dashboard():
                     'degree': degree
                 }
                 
-                st.success("✅ Resume parsed successfully!")
+                st.success("Resume parsed successfully")
                 print("DEBUG - Extracted resume data:", resume_data)
                 
             except Exception as parse_error:
@@ -1395,13 +2588,28 @@ def show_dashboard():
                 print("DEBUG - Resume text length:", len(resume_text) if resume_text else 0)
 
                 ## Showing Analyzed data from (resume_data)
-                st.header("**Resume Analysis **")
+                st.markdown('''
+                <div style="margin: 48px 0 28px 0;">
+                    <h2 style="font-size: 1.875rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Resume Analysis
+                    </h2>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Get name with fallback
                 candidate_name = resume_data.get('name') or 'Candidate'
-                st.success("Hello "+ candidate_name)
+                st.markdown(f'''
+                <div style="background: linear-gradient(145deg, #5E5CE6 0%, #BF5AF2 50%, #FF375F 100%); border-radius: 20px; padding: 28px; margin-bottom: 28px; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(94, 92, 230, 0.3);">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); pointer-events: none;"></div>
+                    <h3 style="color: white; font-weight: 600; margin: 0; font-size: 1.25rem;">Hello, {candidate_name}</h3>
+                    <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 0.9375rem;">Here is what we found in your resume</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
-                st.subheader("**Your Basic info **")
+                st.markdown('''
+                <div style="margin: 28px 0 16px 0;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #FFFFFF;">Basic Information</h4>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Check if any data was extracted
                 has_data = any([
@@ -1413,7 +2621,7 @@ def show_dashboard():
                 ])
                 
                 if not has_data:
-                    st.warning("⚠️ Unable to extract information from your resume. This could be because:")
+                    st.warning("Unable to extract information from your resume. This could be because:")
                     st.markdown("""
                     - The PDF is scanned/image-based (not text-based)
                     - The PDF has unusual formatting
@@ -1440,48 +2648,66 @@ def show_dashboard():
                 exp_result = detect_experience_level(resume_text, no_of_pages)
                 cand_level = exp_result['level']
                 
-                # Display experience level with detailed analysis
-                st.subheader("**Experience Level Analysis**")
+                # Display experience level with Apple-style card
+                st.markdown('''
+                <div style="margin: 36px 0 16px 0;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #FFFFFF;">Experience Level</h4>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 if cand_level == "Experienced":
-                    st.markdown(f'''<h4 style='text-align: left; color: #fba171;'>🏆 You are at <strong>Experienced</strong> level!</h4>''', unsafe_allow_html=True)
+                    level_color = "#FF9F0A"
+                    level_bg = "linear-gradient(145deg, #FF9F0A 0%, #FFCC00 50%, #FFD60A 100%)"
+                    level_icon = ""
                 elif cand_level == "Intermediate":
-                    st.markdown(f'''<h4 style='text-align: left; color: #1ed760;'>📈 You are at <strong>Intermediate</strong> level!</h4>''', unsafe_allow_html=True)
+                    level_color = "#30D158"
+                    level_bg = "linear-gradient(145deg, #30D158 0%, #32D74B 50%, #34C759 100%)"
+                    level_icon = ""
                 else:
-                    st.markdown(f'''<h4 style='text-align: left; color: #3b82f6;'>🌱 You are at <strong>Fresher</strong> level!</h4>''', unsafe_allow_html=True)
+                    level_color = "#0A84FF"
+                    level_bg = "linear-gradient(145deg, #0A84FF 0%, #32ADE6 50%, #64D2FF 100%)"
+                    level_icon = ""
+                
+                st.markdown(f'''
+                <div style="background: {level_bg}; border-radius: 20px; padding: 28px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(10, 132, 255, 0.2);">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%); pointer-events: none;"></div>
+                    <h3 style="color: white; font-weight: 700; margin: 0 0 4px 0; font-size: 1.625rem;">{cand_level}</h3>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.875rem; font-weight: 500;">Detected experience level</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Show experience breakdown
-                with st.expander("📊 View Experience Analysis Details"):
+                with st.expander("View Experience Analysis Details"):
                     details = exp_result['details']
                     
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.markdown("**📅 Work History Analysis:**")
+                        st.markdown("**Work History Analysis:**")
                         if details['years_mentioned'] > 0:
-                            st.success(f"✅ Years mentioned: {details['years_mentioned']} years")
+                            st.success(f"Years mentioned: {details['years_mentioned']} years")
                         else:
-                            st.info("ℹ️ No explicit years of experience found")
+                            st.info("No explicit years of experience found")
                         
                         if details['work_duration_years'] > 0:
-                            st.success(f"✅ Work duration from dates: ~{details['work_duration_years']} years")
+                            st.success(f"Work duration from dates: ~{details['work_duration_years']} years")
                         
                         if details['date_ranges_found']:
                             st.write("**Date ranges detected:**")
                             for start, end, duration in details['date_ranges_found'][:3]:
-                                st.write(f"  • {start} - {end} ({duration} yr{'s' if duration > 1 else ''})")
+                                st.write(f"  - {start} - {end} ({duration} yr{'s' if duration > 1 else ''})")
                     
                     with col2:
-                        st.markdown("**🎓 Education & Background:**")
+                        st.markdown("**Education and Background:**")
                         if details['graduation_year']:
                             years_since = 2026 - details['graduation_year']
-                            st.info(f"📜 Graduation year: {details['graduation_year']} ({years_since} years ago)")
+                            st.info(f"Graduation year: {details['graduation_year']} ({years_since} years ago)")
                         else:
-                            st.info("ℹ️ Graduation year not detected")
+                            st.info("Graduation year not detected")
                         
                         if details['has_internship']:
-                            st.success("✅ Internship experience detected")
+                            st.success("Internship experience detected")
                         else:
-                            st.warning("⚠️ No internship mentions found")
+                            st.warning("No internship mentions found")
                         
                         st.write(f"**Job indicators found:** {details['job_count']}")
                     
@@ -1491,12 +2717,16 @@ def show_dashboard():
 
 
                 ## Skills Analyzing and Recommendation
-                st.subheader("**Skills Analysis & Recommendations **")
+                st.markdown('''
+                <div style="margin: 48px 0 20px 0;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #FFFFFF;">Skills Analysis and Recommendations</h4>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 ### Current Analyzed Skills
                 current_skills = resume_data.get('skills') or []
                 keywords = st_tags(label='### Your Current Skills',
-                text='See our skills recommendation and gap analysis below',value=current_skills,key = '1  ')
+                text='Skills detected from your resume',value=current_skills,key = '1  ')
 
                 ### Keywords for Recommendations
                 ds_keyword = ['tensorflow','keras','pytorch','machine learning','deep Learning','flask','streamlit']
@@ -1504,6 +2734,11 @@ def show_dashboard():
                 android_keyword = ['android','android development','flutter','kotlin','xml','kivy']
                 ios_keyword = ['ios','ios development','swift','cocoa','cocoa touch','xcode']
                 uiux_keyword = ['ux','adobe xd','figma','zeplin','balsamiq','ui','prototyping','wireframes','storyframes','adobe photoshop','photoshop','editing','adobe illustrator','illustrator','adobe after effects','after effects','adobe premier pro','premier pro','adobe indesign','indesign','wireframe','solid','grasp','user research','user experience']
+                cybersecurity_keyword = ['cybersecurity','cyber security','information security','network security','penetration testing','ethical hacking','siem','soc','security analyst','vulnerability assessment','malware analysis','incident response','firewall','ids','ips','cryptography','nist','iso 27001','ceh','cissp','oscp','kali linux','metasploit','burp suite','wireshark','nmap','owasp','threat intelligence','security operations','infosec']
+                cloud_keyword = ['aws','amazon web services','azure','microsoft azure','gcp','google cloud','cloud computing','cloud engineer','cloudformation','lambda','ec2','s3','vpc','iam','cloud architect','sre','site reliability','openshift','helm','prometheus','grafana','cloud native','serverless','iaas','paas','saas']
+                data_analyst_keyword = ['data analyst','data analysis','business analyst','business intelligence','bi analyst','tableau','power bi','powerbi','looker','metabase','data studio','sql','excel analytics','reporting','dashboards','etl','data warehouse','snowflake','redshift','bigquery','google analytics','mixpanel','amplitude','ab testing','a/b testing','statistical analysis','data mining']
+                ml_ai_keyword = ['machine learning engineer','ml engineer','ai engineer','artificial intelligence','deep learning','neural network','nlp','natural language processing','computer vision','opencv','llm','large language model','gpt','bert','transformer','huggingface','langchain','rag','reinforcement learning','recommendation system','mlops','model deployment','feature engineering','scikit-learn','sklearn','xgboost','lightgbm','catboost']
+                devops_keyword = ['devops','devops engineer','site reliability','sre','ci/cd','continuous integration','continuous deployment','jenkins','gitlab ci','github actions','circleci','docker','kubernetes','k8s','terraform','ansible','puppet','chef','infrastructure as code','iac','monitoring','logging','elk stack','grafana','prometheus','nagios','datadog','new relic','argocd','gitops']
                 n_any = ['english','communication','writing', 'microsoft office', 'leadership','customer management', 'social media']
                 ### Skill Recommendations Starts                
                 recommended_skills = []
@@ -1553,9 +2788,9 @@ def show_dashboard():
                         text='Recommended skills generated from System',value=recommended_skills,key = '2')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
                         
-                        # Skill Gap Analysis
+                        #Skill Gap Analysis
                         st.markdown("---")
-                        st.subheader("**🎯 Skill Gap Analysis**")
+                        st.subheader("Skill Gap Analysis")
                         missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
                         matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
                         
@@ -1565,14 +2800,14 @@ def show_dashboard():
                             if matching_skills:
                                 with st.expander("View Matching Skills"):
                                     for skill in matching_skills:
-                                        st.markdown(f"✅ {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         with col2:
                             st.metric("Skills to Learn", len(missing_skills))
                             if missing_skills:
                                 with st.expander("View Missing Skills"):
                                     for skill in missing_skills:
-                                        st.markdown(f"📚 {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         # Calculate skill match percentage
                         if recommended_skills:
@@ -1594,9 +2829,9 @@ def show_dashboard():
                         text='Recommended skills generated from System',value=recommended_skills,key = '3')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
                         
-                        # Skill Gap Analysis
+                        #Skill Gap Analysis
                         st.markdown("---")
-                        st.subheader("**🎯 Skill Gap Analysis**")
+                        st.subheader("Skill Gap Analysis")
                         missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
                         matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
                         
@@ -1606,14 +2841,14 @@ def show_dashboard():
                             if matching_skills:
                                 with st.expander("View Matching Skills"):
                                     for skill in matching_skills:
-                                        st.markdown(f"✅ {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         with col2:
                             st.metric("Skills to Learn", len(missing_skills))
                             if missing_skills:
                                 with st.expander("View Missing Skills"):
                                     for skill in missing_skills:
-                                        st.markdown(f"📚 {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         # Calculate skill match percentage
                         if recommended_skills:
@@ -1635,9 +2870,9 @@ def show_dashboard():
                         text='Recommended skills generated from System',value=recommended_skills,key = '4')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
                         
-                        # Skill Gap Analysis
+                        #Skill Gap Analysis
                         st.markdown("---")
-                        st.subheader("**🎯 Skill Gap Analysis**")
+                        st.subheader("Skill Gap Analysis")
                         missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
                         matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
                         
@@ -1647,14 +2882,14 @@ def show_dashboard():
                             if matching_skills:
                                 with st.expander("View Matching Skills"):
                                     for skill in matching_skills:
-                                        st.markdown(f"✅ {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         with col2:
                             st.metric("Skills to Learn", len(missing_skills))
                             if missing_skills:
                                 with st.expander("View Missing Skills"):
                                     for skill in missing_skills:
-                                        st.markdown(f"📚 {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         # Calculate skill match percentage
                         if recommended_skills:
@@ -1676,9 +2911,9 @@ def show_dashboard():
                         text='Recommended skills generated from System',value=recommended_skills,key = '5')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
                         
-                        # Skill Gap Analysis
+                        #Skill Gap Analysis
                         st.markdown("---")
-                        st.subheader("**🎯 Skill Gap Analysis**")
+                        st.subheader("Skill Gap Analysis")
                         missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
                         matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
                         
@@ -1688,14 +2923,14 @@ def show_dashboard():
                             if matching_skills:
                                 with st.expander("View Matching Skills"):
                                     for skill in matching_skills:
-                                        st.markdown(f"✅ {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         with col2:
                             st.metric("Skills to Learn", len(missing_skills))
                             if missing_skills:
                                 with st.expander("View Missing Skills"):
                                     for skill in missing_skills:
-                                        st.markdown(f"📚 {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         # Calculate skill match percentage
                         if recommended_skills:
@@ -1717,9 +2952,9 @@ def show_dashboard():
                         text='Recommended skills generated from System',value=recommended_skills,key = '6')
                         st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
                         
-                        # Skill Gap Analysis
+                        #Skill Gap Analysis
                         st.markdown("---")
-                        st.subheader("**🎯 Skill Gap Analysis**")
+                        st.subheader("Skill Gap Analysis")
                         missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
                         matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
                         
@@ -1729,14 +2964,14 @@ def show_dashboard():
                             if matching_skills:
                                 with st.expander("View Matching Skills"):
                                     for skill in matching_skills:
-                                        st.markdown(f"✅ {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         with col2:
                             st.metric("Skills to Learn", len(missing_skills))
                             if missing_skills:
                                 with st.expander("View Missing Skills"):
                                     for skill in missing_skills:
-                                        st.markdown(f"📚 {skill}")
+                                        st.markdown(f"- {skill}")
                         
                         # Calculate skill match percentage
                         if recommended_skills:
@@ -1748,88 +2983,329 @@ def show_dashboard():
                         rec_course = course_recommender(uiux_course)
                         break
 
+                    #### Cyber Security Recommendation
+                    elif i.lower() in cybersecurity_keyword:
+                        print(i.lower())
+                        reco_field = 'Cyber Security'
+                        st.success("** Our analysis says you are looking for Cyber Security Jobs **")
+                        recommended_skills = ['Network Security','Penetration Testing','SIEM','Incident Response','Vulnerability Assessment','Ethical Hacking','Firewall Management','Cryptography','Malware Analysis','Cloud Security','Python','Linux','OWASP','Threat Intelligence','Compliance (ISO 27001, NIST)']
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                        text='Recommended skills generated from System',value=recommended_skills,key = '7')
+                        st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        #Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("Skill Gap Analysis")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
+                        # course recommendation
+                        rec_course = course_recommender(cybersecurity_course)
+                        break
+
+                    #### Cloud Computing Recommendation
+                    elif i.lower() in cloud_keyword:
+                        print(i.lower())
+                        reco_field = 'Cloud Computing'
+                        st.success("** Our analysis says you are looking for Cloud Computing Jobs **")
+                        recommended_skills = ['AWS','Azure','GCP','Docker','Kubernetes','Terraform','Linux','CI/CD','Jenkins','Python','Networking','IAM','CloudFormation','Serverless','Microservices','Monitoring','Ansible','Git']
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                        text='Recommended skills generated from System',value=recommended_skills,key = '8')
+                        st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        #Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("Skill Gap Analysis")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
+                        # course recommendation
+                        rec_course = course_recommender(cloud_course)
+                        break
+
+                    #### Data Analyst Recommendation
+                    elif i.lower() in data_analyst_keyword:
+                        print(i.lower())
+                        reco_field = 'Data Analyst'
+                        st.success("** Our analysis says you are looking for Data Analyst Jobs **")
+                        recommended_skills = ['SQL','Python','Excel','Tableau','Power BI','Statistics','Data Visualization','ETL','Data Cleaning','Pandas','Google Analytics','A/B Testing','Storytelling','Business Intelligence','Data Warehousing']
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                        text='Recommended skills generated from System',value=recommended_skills,key = '9')
+                        st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        #Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("Skill Gap Analysis")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
+                        # course recommendation
+                        rec_course = course_recommender(data_analyst_course)
+                        break
+
+                    #### Machine Learning / AI Recommendation
+                    elif i.lower() in ml_ai_keyword:
+                        print(i.lower())
+                        reco_field = 'Machine Learning'
+                        st.success("** Our analysis says you are looking for Machine Learning / AI Jobs **")
+                        recommended_skills = ['Python','TensorFlow','PyTorch','Scikit-learn','Deep Learning','NLP','Computer Vision','MLOps','SQL','Statistics','Mathematics','Feature Engineering','Model Deployment','Docker','AWS/GCP ML Services','LLMs','Pandas','NumPy']
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                        text='Recommended skills generated from System',value=recommended_skills,key = '10')
+                        st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        #Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("Skill Gap Analysis")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
+                        # course recommendation
+                        rec_course = course_recommender(ml_ai_course)
+                        break
+
+                    #### DevOps Recommendation
+                    elif i.lower() in devops_keyword:
+                        print(i.lower())
+                        reco_field = 'DevOps'
+                        st.success("** Our analysis says you are looking for DevOps Jobs **")
+                        recommended_skills = ['Linux','Docker','Kubernetes','CI/CD','Jenkins','Terraform','AWS','Azure','Git','Python/Bash','Ansible','Monitoring','Prometheus','Grafana','GitOps','Infrastructure as Code','Networking','Security']
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                        text='Recommended skills generated from System',value=recommended_skills,key = '11')
+                        st.markdown('''<h5 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost the chances of getting a Job</h5>''',unsafe_allow_html=True)
+                        
+                        #Skill Gap Analysis
+                        st.markdown("---")
+                        st.subheader("Skill Gap Analysis")
+                        missing_skills = [skill for skill in recommended_skills if not skills_match(current_skills, skill)]
+                        matching_skills = [skill for skill in recommended_skills if skills_match(current_skills, skill)]
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Skills You Have", len(matching_skills))
+                            if matching_skills:
+                                with st.expander("View Matching Skills"):
+                                    for skill in matching_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        with col2:
+                            st.metric("Skills to Learn", len(missing_skills))
+                            if missing_skills:
+                                with st.expander("View Missing Skills"):
+                                    for skill in missing_skills:
+                                        st.markdown(f"- {skill}")
+                        
+                        # Calculate skill match percentage
+                        if recommended_skills:
+                            skill_match_percentage = (len(matching_skills) / len(recommended_skills)) * 100
+                            st.progress(skill_match_percentage / 100)
+                            st.info(f"You match {skill_match_percentage:.1f}% of recommended skills for {reco_field}")
+                        
+                        # course recommendation
+                        rec_course = course_recommender(devops_course)
+                        break
+
                     #### For Not Any Recommendations
                     elif i.lower() in n_any:
                         print(i.lower())
                         reco_field = 'NA'
-                        st.warning("** Currently our tool only predicts and recommends for Data Science, Web, Android, IOS and UI/UX Development**")
+                        st.warning("** Currently our tool predicts and recommends for Data Science, Data Analyst, Machine Learning/AI, Web, Android, IOS, UI/UX, Cyber Security, Cloud Computing and DevOps**")
                         recommended_skills = ['No Recommendations']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
-                        text='Currently No Recommendations',value=recommended_skills,key = '6')
+                        text='Currently No Recommendations',value=recommended_skills,key = '12')
                         st.markdown('''<h5 style='text-align: left; color: #092851;'>Maybe Available in Future Updates</h5>''',unsafe_allow_html=True)
                         # course recommendation
                         rec_course = "Sorry! Not Available for this Field"
                         break
 
 
-                ## Resume Scorer & Resume Writing Tips
-                st.subheader("**Resume Tips & Ideas **")
+                ##Resume Scorer &Resume Writing Tips
+                st.markdown('''
+                <div style="margin: 48px 0 20px 0;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; color: #FFFFFF;">Resume Tips and Insights</h4>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.9375rem;">Suggestions to improve your resume quality</p>
+                </div>
+                ''', unsafe_allow_html=True)
+                
                 resume_score = 0
                 resume_lower = resume_text.lower()  # Convert to lowercase for case-insensitive matching
                 
                 ### Predicting Whether these key points are added to the resume
+                # Collect positives and negatives separately
+                positives = []
+                negatives = []
+                
                 if re.search(r'\b(objective|summary|profile|about\s*me)\b', resume_lower):
                     resume_score = resume_score + 6
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Objective/Summary</h4>''',unsafe_allow_html=True)                
+                    positives.append("Objective/Summary")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add your career objective, it will give your career intension to the Recruiters.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Career Objective", "It will give your career intention to the Recruiters"))
 
                 if re.search(r'\b(education|school|college|university|degree|bachelor|master|b\.?tech|m\.?tech)\b', resume_lower):
                     resume_score = resume_score + 12
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Education Details</h4>''',unsafe_allow_html=True)
+                    positives.append("Education Details")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Education. It will give Your Qualification level to the recruiter</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Education", "It will give your qualification level to the recruiter"))
 
                 if re.search(r'\b(experience|work\s*experience|employment|work\s*history)\b', resume_lower):
                     resume_score = resume_score + 16
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Experience</h4>''',unsafe_allow_html=True)
+                    positives.append("Experience")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Experience. It will help you to stand out from crowd</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Experience", "It will help you stand out from the crowd"))
 
                 if re.search(r'\b(internship|internships|intern)\b', resume_lower):
                     resume_score = resume_score + 6
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Internships</h4>''',unsafe_allow_html=True)
+                    positives.append("Internships")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Internships. It will help you to stand out from crowd</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Internships", "It will help you stand out from the crowd"))
 
                 if re.search(r'\b(skills|skill|technical\s*skills|core\s*competencies)\b', resume_lower):
                     resume_score = resume_score + 7
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Skills</h4>''',unsafe_allow_html=True)
+                    positives.append("Skills")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Skills. It will help you a lot</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Skills", "It will help you a lot"))
 
                 if re.search(r'\b(hobbies|hobby)\b', resume_lower):
                     resume_score = resume_score + 4
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Hobbies</h4>''',unsafe_allow_html=True)
+                    positives.append("Hobbies")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Hobbies. It will show your personality to the Recruiters and give the assurance that you are fit for this role or not.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Hobbies", "It shows your personality to the Recruiters"))
 
                 if re.search(r'\b(interests|interest)\b', resume_lower):
                     resume_score = resume_score + 5
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Interest</h4>''',unsafe_allow_html=True)
+                    positives.append("Interests")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Interest. It will show your interest other that job.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Interests", "It shows your interest beyond the job"))
 
                 if re.search(r'\b(achievements|achievement|accomplishments|awards)\b', resume_lower):
                     resume_score = resume_score + 13
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Achievements </h4>''',unsafe_allow_html=True)
+                    positives.append("Achievements")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Achievements. It will show that you are capable for the required position.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Achievements", "It shows you are capable for the position"))
 
                 if re.search(r'\b(certifications|certification|certified|certificate)\b', resume_lower):
                     resume_score = resume_score + 12
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Certifications </h4>''',unsafe_allow_html=True)
+                    positives.append("Certifications")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Certifications. It will show that you have done some specialization for the required position.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Certifications", "It shows your specialization for the position"))
 
                 if re.search(r'\b(projects|project|portfolio)\b', resume_lower):
                     resume_score = resume_score + 19
-                    st.markdown('''<h5 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects</h4>''',unsafe_allow_html=True)
+                    positives.append("Projects")
                 else:
-                    st.markdown('''<h5 style='text-align: left; color: #ff0000;'>[-] Please add Projects. It will show that you have done work related the required position or not.</h4>''',unsafe_allow_html=True)
+                    negatives.append(("Projects", "It shows work related to the required position"))
 
-                ## Enhanced Resume Score Section with detailed breakdown
-                st.subheader("**Resume Score Analysis **")
+                # Display in two columns - Positives on Left, Negatives on Right
+                tips_col1, tips_col2 = st.columns(2)
+                
+                with tips_col1:
+                    st.markdown('''
+                    <div style="background: rgba(48, 209, 88, 0.1); border: 1px solid rgba(48, 209, 88, 0.3); border-radius: 16px; padding: 20px; height: 100%;">
+                        <h5 style="color: #30D158; margin-bottom: 16px; font-size: 1rem; font-weight: 600;">What You Have</h5>
+                    </div>
+                    ''', unsafe_allow_html=True)
+                    for item in positives:
+                        st.markdown(f'''<p style="color: #30D158; margin: 8px 0; font-size: 0.9rem;">[+] {item}</p>''', unsafe_allow_html=True)
+                
+                with tips_col2:
+                    st.markdown('''
+                    <div style="background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 16px; padding: 20px; height: 100%;">
+                        <h5 style="color: #FF453A; margin-bottom: 16px; font-size: 1rem; font-weight: 600;">What to Add</h5>
+                    </div>
+                    ''', unsafe_allow_html=True)
+                    for item, reason in negatives:
+                        st.markdown(f'''<p style="color: #FF453A; margin: 8px 0; font-size: 0.9rem;">[-] {item}</p>''', unsafe_allow_html=True)
+
+                ## EnhancedResume Score Section with detailed breakdown
+                st.markdown('''
+                <div style="margin: 40px 0 16px 0;">
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Resume Score</h4>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem;">Overall quality assessment based on content completeness</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Max possible score from sections: 6+12+16+6+7+4+5+13+12+19 = 100
                 # Cap resume_score at 100
@@ -1846,7 +3322,7 @@ def show_dashboard():
                         """
                         <style>
                             .stProgress > div > div > div > div {
-                                background-color: #1ed760;
+                                background-color: #30D158;
                             }
                         </style>""",
                         unsafe_allow_html=True,
@@ -1862,13 +3338,13 @@ def show_dashboard():
                     
                     # Display score with color coding
                     if score_percentage >= 80:
-                        score_color = "#1ed760"
+                        score_color = "#30D158"
                         score_label = "Excellent"
                     elif score_percentage >= 60:
-                        score_color = "#fba171"
+                        score_color = "#FF9F0A"
                         score_label = "Good"
                     elif score_percentage >= 40:
-                        score_color = "#ffcc00"
+                        score_color = "#FFD60A"
                         score_label = "Average"
                     else:
                         score_color = "#d73b5c"
@@ -1878,7 +3354,7 @@ def show_dashboard():
                     st.markdown(f'''<h3 style='text-align: center; color: {score_color};'>{score_label}</h3>''', unsafe_allow_html=True)
                 
                 # Detailed score breakdown
-                with st.expander("📊 View Detailed Score Breakdown"):
+                with st.expander("View Detailed Score Breakdown"):
                     breakdown_data = {
                         'Section': ['Objective/Summary', 'Education', 'Experience', 'Internships', 'Skills Section', 
                                    'Hobbies', 'Interests', 'Achievements', 'Certifications', 'Projects'],
@@ -1897,7 +3373,7 @@ def show_dashboard():
                         'Max Points': [6, 12, 16, 6, 7, 4, 5, 13, 12, 19]
                     }
                     breakdown_df = pd.DataFrame(breakdown_data)
-                    breakdown_df['Status'] = breakdown_df.apply(lambda x: '✅' if x['Points Earned'] > 0 else '❌', axis=1)
+                    breakdown_df['Status'] = breakdown_df.apply(lambda x: 'Yes' if x['Points Earned'] > 0 else 'No', axis=1)
                     st.dataframe(breakdown_df, use_container_width=True)
                     st.info(f"**Total Score: {int(resume_score)}/100** ({int(score_percentage)}%)")
                 
@@ -1906,47 +3382,57 @@ def show_dashboard():
                 # print(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data['name'], resume_data['email'], str(resume_score), timestamp, str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']), str(recommended_skills), str(rec_course), pdf_name)
 
                 ## ============ DASHBOARD OVERVIEW ============
-                st.header("**📊 Analysis Dashboard Overview**")
-                st.markdown("A comprehensive view of your resume analysis results:")
+                st.markdown('''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Analysis Dashboard
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">A comprehensive view of your resume analysis results</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Dashboard metrics row
                 metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
                 
                 with metric_col1:
                     st.markdown(f"""
-                    <div class='score-card'>
-                        <div class='score-value' style='color: {score_color};'>{int(score_percentage)}%</div>
+                    <div class='score-card blue'>
                         <div class='score-label'>Resume Score</div>
+                        <div class='score-value'>{int(score_percentage)}%</div>
                     </div>
                     """, unsafe_allow_html=True)
                 
                 with metric_col2:
                     st.markdown(f"""
-                    <div class='score-card'>
-                        <div class='score-value' style='color: #2563eb;'>{len(current_skills)}</div>
+                    <div class='score-card purple'>
                         <div class='score-label'>Skills Found</div>
+                        <div class='score-value'>{len(current_skills)}</div>
                     </div>
                     """, unsafe_allow_html=True)
                 
                 with metric_col3:
                     matched_count = len([s for s in recommended_skills if skills_match(current_skills, s)])
                     st.markdown(f"""
-                    <div class='score-card'>
-                        <div class='score-value' style='color: #059669;'>{matched_count}/{len(recommended_skills)}</div>
+                    <div class='score-card green'>
                         <div class='score-label'>Skills Match</div>
+                        <div class='score-value'>{matched_count}/{len(recommended_skills)}</div>
                     </div>
                     """, unsafe_allow_html=True)
                 
                 with metric_col4:
                     st.markdown(f"""
-                    <div class='score-card'>
-                        <div class='score-value' style='color: #0d9488;'>{cand_level}</div>
-                        <div class='score-label'>Experience Level</div>
+                    <div class='score-card orange'>
+                        <div class='score-label'>Level</div>
+                        <div class='score-value' style='font-size: 1.5rem;'>{cand_level}</div>
                     </div>
                     """, unsafe_allow_html=True)
                 
                 # Visual Analysis Charts
-                st.subheader("**📈 Visual Analytics**")
+                st.markdown('''
+                <div style="margin: 32px 0 16px 0;">
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Visual Analytics</h4>
+                </div>
+                ''', unsafe_allow_html=True)
+                
                 chart_col1, chart_col2 = st.columns(2)
                 
                 with chart_col1:
@@ -1956,15 +3442,18 @@ def show_dashboard():
                     
                     fig_skills = px.pie(
                         values=[skills_matched, skills_missing],
-                        names=['Matched Skills', 'Missing Skills'],
+                        names=['Matched', 'To Learn'],
                         title='Skills Gap Analysis',
-                        color_discrete_sequence=['#10b981', '#ef4444'],
-                        hole=0.4
+                        color_discrete_sequence=['#30D158', '#FF453A'],
+                        hole=0.6
                     )
                     fig_skills.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='white')
+                        font=dict(family='Inter, -apple-system, sans-serif', color='#FFFFFF'),
+                        showlegend=True,
+                        legend=dict(orientation='h', yanchor='bottom', y=-0.2),
+                        margin=dict(t=40, b=40, l=20, r=20)
                     )
                     st.plotly_chart(fig_skills, use_container_width=True)
                 
@@ -1976,34 +3465,42 @@ def show_dashboard():
                         'Experience': 16 if re.search(r'\b(experience|work\s*experience)\b', resume_lower) else 0,
                         'Skills': 7 if re.search(r'\b(skills|skill)\b', resume_lower) else 0,
                         'Projects': 19 if re.search(r'\b(projects|project)\b', resume_lower) else 0,
-                        'Certifications': 12 if re.search(r'\b(certifications|certified)\b', resume_lower) else 0,
+                        'Certs': 12 if re.search(r'\b(certifications|certified)\b', resume_lower) else 0,
                     }
                     
                     fig_bar = px.bar(
                         x=list(score_sections.keys()),
                         y=list(score_sections.values()),
-                        title='Section-wise Score',
-                        labels={'x': 'Section', 'y': 'Points'},
-                        color=list(score_sections.values()),
-                        color_continuous_scale='greens'
+                        title='Section Scores',
+                        labels={'x': '', 'y': 'Points'},
+                        color_discrete_sequence=['#0A84FF']
                     )
+                    fig_bar.update_traces(marker_color='#0A84FF')
                     fig_bar.update_layout(
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='white'),
-                        showlegend=False
+                        font=dict(family='Inter, -apple-system, sans-serif', color='#FFFFFF'),
+                        showlegend=False,
+                        margin=dict(t=40, b=40, l=20, r=20),
+                        xaxis=dict(showgrid=False),
+                        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
                     )
                     st.plotly_chart(fig_bar, use_container_width=True)
                 
-                # Quick Summary Cards
-                st.subheader("**📋 Quick Summary**")
+                #Quick Summary Cards
+                st.markdown('''
+                <div style="margin: 32px 0 16px 0;">
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Quick Summary</h4>
+                </div>
+                ''', unsafe_allow_html=True)
+                
                 summary_col1, summary_col2 = st.columns(2)
                 
                 with summary_col1:
                     st.markdown(f"""
                     <div class='dashboard-card'>
-                        <h4 style='color: #000000;'>Profile Summary</h4>
-                        <ul style='color: #000000; list-style: none; padding: 0;'>
+                        <h4 style='color: #FFFFFF;'>Profile Summary</h4>
+                        <ul style='color: #F2F2F7; list-style: none; padding: 0;'>
                             <li><strong>Name:</strong> {resume_data.get('name') or 'Not Found'}</li>
                             <li><strong>Email:</strong> {resume_data.get('email') or 'Not Found'}</li>
                             <li><strong>Pages:</strong> {resume_data.get('no_of_pages') or 'N/A'}</li>
@@ -2017,8 +3514,8 @@ def show_dashboard():
                     skills_list = ', '.join(current_skills[:8]) + ('...' if len(current_skills) > 8 else '')
                     st.markdown(f"""
                     <div class='dashboard-card'>
-                        <h4 style='color: #000000;'>Skills Overview</h4>
-                        <ul style='color: #000000; list-style: none; padding: 0;'>
+                        <h4 style='color: #FFFFFF;'>Skills Overview</h4>
+                        <ul style='color: #F2F2F7; list-style: none; padding: 0;'>
                             <li><strong>Detected Skills:</strong> {len(current_skills)}</li>
                             <li><strong>Recommended:</strong> {len(recommended_skills)}</li>
                             <li><strong>Matching:</strong> {matched_count} skills</li>
@@ -2041,8 +3538,13 @@ def show_dashboard():
                 insert_data(str(sec_token), str(ip_add), (host_name), (dev_user), (os_name_ver), (latlong), (city), (state), (country), (act_name), (act_mail), (act_mob), resume_data.get('name') or 'Unknown', resume_data.get('email') or 'Unknown', str(resume_score), timestamp, str(resume_data.get('no_of_pages') or 0), reco_field, cand_level, str(current_skills), str(recommended_skills), str(rec_course), pdf_name)
 
                 ## AI-Powered Interview Questions
-                st.header("**🤖 AI-Powered Interview Preparation**")
-                st.markdown(f"Get ready for your {reco_field} interview with these personalized questions!")
+                st.markdown(f'''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Interview Preparation
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">AI-generated questions tailored for {reco_field} roles</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 # Generate interview questions based on field and experience level
                 interview_questions = generate_interview_questions(reco_field, cand_level, current_skills)
@@ -2050,75 +3552,91 @@ def show_dashboard():
                 if interview_questions:
                     for idx, qa in enumerate(interview_questions, 1):
                         with st.expander(f"Question {idx}: {qa['question']}"):
-                            st.markdown("**💡 Suggested Answer:**")
+                            st.markdown("**Suggested Answer:**")
                             st.write(qa['answer'])
                             if 'tips' in qa:
-                                st.markdown("**📌 Tips:**")
+                                st.markdown("**Tips:**")
                                 st.info(qa['tips'])
                 
                 ## Skill-Based Interview Questions (Based on Resume Skills)
-                st.subheader("**🎯 Skill-Specific Interview Questions**")
-                st.markdown("These questions are generated based on the skills detected in your resume:")
+                st.markdown('''
+                <div style="margin: 32px 0 16px 0;">
+                    <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Skill-Specific Questions</h4>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem;">Based on the skills detected in your resume</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 skill_based_questions = generate_resume_based_questions(current_skills, reco_field)
                 
                 if skill_based_questions:
                     for idx, sq in enumerate(skill_based_questions, 1):
-                        with st.expander(f"🔹 {sq['skill']} - {sq['question'][:60]}..."):
+                        with st.expander(f"{sq['skill']} - {sq['question'][:60]}..."):
                             st.markdown(f"**Skill:** `{sq['skill']}`")
-                            st.markdown(f"**❓ Question:** {sq['question']}")
-                            st.markdown("**✅ Answer:**")
+                            st.markdown(f"**Question:** {sq['question']}")
+                            st.markdown("**Answer:**")
                             st.info(sq['answer'])
                 else:
                     st.info("Add more technical skills to your resume to get skill-specific interview questions!")
                 
                 ## Trending Skills Section
-                st.header("**🔥 Trending Skills in 2026**")
+                st.markdown('''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Trending Skills 2026
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">Skills in high demand for your field</p>
+                </div>
+                ''', unsafe_allow_html=True)
+                
                 trending_skills = get_trending_skills(reco_field)
                 
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.markdown("""
-                    <div class='dashboard-card'>
-                        <h4 style='color: #dc2626;'>🚀 Hot Skills</h4>
-                        <p style='color: #666; font-size: 0.85rem;'>High demand right now</p>
+                    <div class='dashboard-card' style='border-top: 4px solid #ff3b30;'>
+                        <h4 style='color: #ff3b30; font-weight: 600; margin-bottom: 4px;'>Hot Skills</h4>
+                        <p style='color: rgba(235, 235, 245, 0.6); font-size: 0.8rem; margin-bottom: 16px;'>High demand right now</p>
                     </div>
                     """, unsafe_allow_html=True)
                     for skill in trending_skills['hot']:
                         if skills_match(current_skills, skill):
-                            st.success(f"✅ {skill}")
+                            st.success(f"{skill}")
                         else:
-                            st.warning(f"📈 {skill}")
+                            st.warning(f"{skill}")
                 
                 with col2:
                     st.markdown("""
-                    <div class='dashboard-card'>
-                        <h4 style='color: #2563eb;'>📊 Growing Skills</h4>
-                        <p style='color: #666; font-size: 0.85rem;'>Rising in demand</p>
+                    <div class='dashboard-card' style='border-top: 4px solid #0071e3;'>
+                        <h4 style='color: #0071e3; font-weight: 600; margin-bottom: 4px;'>Growing Skills</h4>
+                        <p style='color: rgba(235, 235, 245, 0.6); font-size: 0.8rem; margin-bottom: 16px;'>Rising in demand</p>
                     </div>
                     """, unsafe_allow_html=True)
                     for skill in trending_skills['growing']:
                         if skills_match(current_skills, skill):
-                            st.success(f"✅ {skill}")
+                            st.success(f"{skill}")
                         else:
-                            st.info(f"📈 {skill}")
+                            st.info(f"{skill}")
                 
                 with col3:
                     st.markdown("""
-                    <div class='dashboard-card'>
-                        <h4 style='color: #059669;'>✨ Essential Skills</h4>
-                        <p style='color: #666; font-size: 0.85rem;'>Must-have foundations</p>
+                    <div class='dashboard-card' style='border-top: 4px solid #34c759;'>
+                        <h4 style='color: #34c759; font-weight: 600; margin-bottom: 4px;'>Essential Skills</h4>
+                        <p style='color: rgba(235, 235, 245, 0.6); font-size: 0.8rem; margin-bottom: 16px;'>Must-have foundations</p>
                     </div>
                     """, unsafe_allow_html=True)
                     for skill in trending_skills['essential']:
                         if skills_match(current_skills, skill):
-                            st.success(f"✅ {skill}")
+                            st.success(f"{skill}")
                         else:
-                            st.error(f"❌ {skill}")
+                            st.error(f"{skill}")
                 
                 ## Job Recommendations
-                st.header("**💼 Job Recommendations**")
-                st.markdown("Based on your skills and experience, here are some job roles you might be interested in:")
+                st.markdown('''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Job Opportunities
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">Roles that match your skills and experience level</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 
                 job_recommendations = generate_job_recommendations(reco_field, cand_level, current_skills)
                 
@@ -2129,30 +3647,41 @@ def show_dashboard():
                         with cols[idx % 2]:
                             st.markdown(f"""
                             <div class='job-card'>
-                                <h3 style='color: #1e3a8a; margin-bottom: 10px;'>{job['title']}</h3>
-                                <p style='color: #000000; margin: 5px 0;'><strong>📊 Experience Level:</strong> {job['level']}</p>
-                                <p style='color: #000000; margin: 5px 0;'><strong>🛠️ Key Skills:</strong> {', '.join(job['skills'][:5])}</p>
-                                <p style='color: #000000; margin: 5px 0;'><strong>💰 Avg Salary:</strong> {job['salary']}</p>
-                                <p style='color: #333333; margin-top: 10px;'>{job['description']}</p>
-                                <hr style='border: 1px solid #e0e0e0; margin: 15px 0;'>
-                                <p style='color: #000000; margin-bottom: 10px;'><strong>Find Jobs on:</strong></p>
-                                <div style='display: flex; flex-wrap: wrap; gap: 8px;'>
-                                    <a href='{job_urls['naukri']}' target='_blank' class='job-platform-btn btn-naukri'>Naukri</a>
-                                    <a href='{job_urls['linkedin']}' target='_blank' class='job-platform-btn btn-linkedin'>LinkedIn</a>
-                                    <a href='{job_urls['indeed']}' target='_blank' class='job-platform-btn btn-indeed'>Indeed</a>
-                                    <a href='{job_urls['glassdoor']}' target='_blank' class='job-platform-btn btn-glassdoor'>Glassdoor</a>
-                                    <a href='{job_urls['internshala']}' target='_blank' class='job-platform-btn btn-internshala'>Internshala</a>
+                                <h3 style='color: #FFFFFF; margin-bottom: 16px; font-size: 1.25rem; font-weight: 600;'>{job['title']}</h3>
+                                <div style='display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;'>
+                                    <span style='background: rgba(0, 113, 227, 0.1); color: #0071e3; padding: 6px 14px; border-radius: 980px; font-size: 0.8rem; font-weight: 500;'>{job['level']}</span>
+                                    <span style='background: rgba(52, 199, 89, 0.1); color: #34c759; padding: 6px 14px; border-radius: 980px; font-size: 0.8rem; font-weight: 500;'>{job['salary']}</span>
+                                </div>
+                                <p style='color: rgba(235, 235, 245, 0.6); margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.5;'>{job['description']}</p>
+                                <p style='color: #FFFFFF; font-size: 0.85rem; margin-bottom: 16px;'><strong>Skills:</strong> {', '.join(job['skills'][:5])}</p>
+                                <div style='display: flex; flex-wrap: wrap; gap: 8px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);'>
+                                    <a href='{job_urls['naukri']}' target='_blank' class='job-platform-btn'>Naukri</a>
+                                    <a href='{job_urls['linkedin']}' target='_blank' class='job-platform-btn'>LinkedIn</a>
+                                    <a href='{job_urls['indeed']}' target='_blank' class='job-platform-btn'>Indeed</a>
+                                    <a href='{job_urls['glassdoor']}' target='_blank' class='job-platform-btn'>Glassdoor</a>
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
 
                 ## Recommending Resume Writing Video
-                st.header("**Bonus Video for Resume Writing Tips**")
+                st.markdown('''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Resume Writing Tips
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">Expert advice to perfect your resume</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 resume_vid = random.choice(resume_videos)
                 st.video(resume_vid)
 
-                ## Recommending Interview Preparation Video
-                st.header("**Bonus Video for Interview Tips**")
+                ## RecommendingInterview Preparation Video
+                st.markdown('''
+                <div style="margin: 48px 0 24px 0;">
+                    <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; letter-spacing: -0.02em;">Interview Mastery
+                    </h2>
+                    <p style="color: rgba(235, 235, 245, 0.6); font-size: 1rem;">Tips to ace your interviews</p>
+                </div>
+                ''', unsafe_allow_html=True)
                 interview_vid = random.choice(interview_videos)
                 st.video(interview_vid)
 
@@ -2222,7 +3751,14 @@ def show_feedback():
             st.warning("Database not available. Cannot fetch comments.")
 
 def show_feedback():
-    st.header("**Feedback**")
+    st.markdown('''
+    <div style="text-align: center; padding: 40px 0 32px 0;">
+        <h1 style="font-size: 2.5rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.03em; margin-bottom: 12px;">Share Your Feedback
+        </h1>
+        <p style="font-size: 1.15rem; color: rgba(235, 235, 245, 0.6); font-weight: 400; max-width: 500px; margin: 0 auto;">Help us improve by sharing your experience
+        </p>
+    </div>
+    ''', unsafe_allow_html=True)
     
     # timestamp 
     ts = time.time()
@@ -2230,80 +3766,196 @@ def show_feedback():
     cur_time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
     timestamp = str(cur_date+'_'+cur_time)
 
-    # Feedback Form
-    with st.form("my_form"):
-        st.write("We value your feedback")            
-        feed_name = st.text_input('Name')
-        feed_email = st.text_input('Email')
-        feed_score = st.slider('Rate Us From 1 - 5', 1, 5)
-        comments = st.text_area('Comments')
-        Timestamp = timestamp        
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            if feed_name and feed_email:
-                insertf_data(feed_name,feed_email,feed_score,comments,Timestamp)    
-                st.success("Thanks! Your Feedback was recorded.") 
-            else:
-                st.warning("Please fill in all required fields")
+    # Centered feedback form
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        with st.form("my_form"):
+            feed_name = st.text_input('Your Name', placeholder="Enter your name")
+            feed_email = st.text_input('Email Address', placeholder="your@email.com")
+            feed_score = st.slider('Rate Your Experience', 1, 5, 4)
+            comments = st.text_area('Your Feedback', placeholder="Share your thoughts with us...")
+            Timestamp = timestamp        
+            submitted = st.form_submit_button(" Submit Feedback")
+            if submitted:
+                if feed_name and feed_email:
+                    insertf_data(feed_name, feed_email, feed_score, comments, Timestamp)    
+                    st.success(" Thank you! Your feedback has been recorded.") 
+                else:
+                    st.warning("Please fill in all required fields")
 
     # Display feedback statistics
     if DB_AVAILABLE:
-        st.subheader("**User Ratings**")
+        st.markdown('''
+        <div style="margin: 48px 0 24px 0;">
+            <h3 style="font-size: 1.5rem; font-weight: 600; color: #FFFFFF;">Community Ratings</h3>
+        </div>
+        ''', unsafe_allow_html=True)
+        
         feedback_data = list(feedback_collection.find({}))
         if feedback_data:
             feedback_df = pd.DataFrame(feedback_data)
             if 'feed_score' in feedback_df.columns:
                 labels = feedback_df.feed_score.unique()
                 values = feedback_df.feed_score.value_counts()
-                fig = px.pie(values=values, names=labels, title="User Rating Distribution", color_discrete_sequence=px.colors.sequential.Aggrnyl)
-                st.plotly_chart(fig)
+                fig = px.pie(
+                    values=values, 
+                    names=labels, 
+                    title="User Ratings Distribution", 
+                    color_discrete_sequence=['#0071e3', '#34c759', '#ff9500', '#af52de', '#ff3b30'],
+                    hole=0.5
+                )
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(family='Inter, -apple-system, sans-serif', color='#FFFFFF'),
+                    margin=dict(t=40, b=40, l=20, r=20)
+                )
+                st.plotly_chart(fig, use_container_width=True)
             
-            st.subheader("**User Comments**")
+            st.markdown('''
+            <div style="margin: 32px 0 16px 0;">
+                <h4 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF;">Recent Comments</h4>
+            </div>
+            ''', unsafe_allow_html=True)
+            
             if 'feed_name' in feedback_df.columns and 'comments' in feedback_df.columns:
                 comment_df = feedback_df[['feed_name', 'comments']].copy()
                 comment_df.columns = ['User', 'Comment']
                 st.dataframe(comment_df, use_container_width=True)
         else:
-            st.info("No feedback available yet.")
+            st.info("No feedback available yet. Be the first to share!")
     else:
         st.warning("Database not available")
 
 def show_about():
-    st.header("**About skilledge**")
-    
     st.markdown('''
-    ### Overview
+    <div style="text-align: center; padding: 60px 0 40px 0;">
+        <h1 style="font-size: 3rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.03em; margin-bottom: 16px;">About <span style="background: linear-gradient(90deg, #0071e3, #af52de, #ff9500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">skilledge</span>
+        </h1>
+        <p style="font-size: 1.25rem; color: rgba(235, 235, 245, 0.6); font-weight: 400; max-width: 600px; margin: 0 auto;">AI-powered resume analysis that helps you stand out in your job search
+        </p>
+    </div>
+    ''', unsafe_allow_html=True)
     
-    skilledge is an intelligent tool that uses natural language processing to parse and analyze resumes. 
-    The system identifies keywords, clusters them by sectors, and provides personalized recommendations to help 
-    improve your resume and career prospects.
+    # Features Grid
+    col1, col2 = st.columns(2)
     
-    ### Key Features
+    with col1:
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Smart Resume Parsing
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Advanced NLP algorithms extract and analyze key information from your resume, identifying skills, experience, and qualifications with precision.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Comprehensive Analysis
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Get detailed insights into your resume's strengths and areas for improvement with our intelligent scoring system.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Skill Gap Analysis
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Discover which skills you need to learn based on your target career path and current market demands.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
     
-    - **Resume Parsing**: Automatically extracts information from PDF resumes
-    - **Skill Analysis**: Identifies and categorizes your skills
-    - **Career Recommendations**: Suggests relevant skills, courses, and career paths
-    - **Resume Scoring**: Provides an objective score based on content quality
-    - **Analytics Dashboard**: Comprehensive insights into your resume
+    with col2:
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Job Matching
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Receive personalized job recommendations across multiple platforms based on your skills and experience level.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">AI Interview Prep
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Practice with AI-generated interview questions tailored to your specific skills and target job roles.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        st.markdown('''
+        <div class="dashboard-card">
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Course Recommendations
+            </h3>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; line-height: 1.6;">Get curated course suggestions from top platforms to upskill and stay competitive in your field.
+            </p>
+        </div>
+        ''', unsafe_allow_html=True)
     
-    ### How to Use
+    # How it works section
+    st.markdown('''
+    <div style="margin: 48px 0 24px 0;">
+        <h2 style="font-size: 2rem; font-weight: 600; color: #FFFFFF; text-align: center; margin-bottom: 32px;">How It Works
+        </h2>
+    </div>
+    ''', unsafe_allow_html=True)
     
-    1. **Login/Signup**: Create an account or login to access the platform
-    2. **Upload Resume**: Upload your resume in PDF format on the dashboard
-    3. **Get Analysis**: Receive instant analysis with personalized recommendations
-    4. **Improve**: Apply the suggestions to enhance your resume
-    5. **Feedback**: Share your experience to help us improve
+    step_col1, step_col2, step_col3, step_col4 = st.columns(4)
     
-    ### Technology Stack
+    with step_col1:
+        st.markdown('''
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;"></div>
+            <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 8px;">Upload</h4>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.85rem;">Upload your resume in PDF format</p>
+        </div>
+        ''', unsafe_allow_html=True)
     
-    - Natural Language Processing with spaCy
-    - Machine Learning for skill categorization
-    - MongoDB for data storage
-    - Streamlit for the web interface
+    with step_col2:
+        st.markdown('''
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;"></div>
+            <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 8px;">Analyze</h4>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.85rem;">AI analyzes your resume</p>
+        </div>
+        ''', unsafe_allow_html=True)
     
+    with step_col3:
+        st.markdown('''
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;"></div>
+            <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 8px;">Insights</h4>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.85rem;">Get personalized insights</p>
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    with step_col4:
+        st.markdown('''
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;"></div>
+            <h4 style="color: #FFFFFF; font-weight: 600; margin-bottom: 8px;">Improve</h4>
+            <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.85rem;">Apply recommendations</p>
+        </div>
+        ''', unsafe_allow_html=True)
+    
+    # Technology stack
+    st.markdown('''
+    <div style="margin: 48px 0 24px 0; text-align: center;">
+        <h3 style="font-size: 1.5rem; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">Built With Modern Technology
+        </h3>
+        <p style="color: rgba(235, 235, 245, 0.6); font-size: 0.95rem; max-width: 500px; margin: 0 auto;">Powered by Python, Streamlit, spaCy NLP, MongoDB, and advanced machine learning algorithms
+        </p>
+    </div>
     ''', unsafe_allow_html=True)
 
 # Calling the main (run()) function to make the whole process run
 if __name__ == "__main__":
     run()
+
+
+
 

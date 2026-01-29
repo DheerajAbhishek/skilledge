@@ -53,6 +53,61 @@ uiux_course = [['Google UX Design Professional Certificate','https://www.courser
                ['Adobe XD for Beginners [Free]','https://youtu.be/WEljsc2jorI'],
                ['Adobe XD in Simple Way','https://learnux.io/course/adobe-xd']]
 
+cybersecurity_course = [['Google Cybersecurity Professional Certificate','https://www.coursera.org/professional-certificates/google-cybersecurity'],
+                        ['IBM Cybersecurity Analyst Professional Certificate','https://www.coursera.org/professional-certificates/ibm-cybersecurity-analyst'],
+                        ['CompTIA Security+ Certification Training','https://www.udemy.com/course/securityplus/'],
+                        ['Ethical Hacking Course by StationX','https://www.stationx.net/ethical-hacking/'],
+                        ['Penetration Testing and Ethical Hacking','https://www.cybrary.it/course/penetration-testing-and-ethical-hacking/'],
+                        ['Certified Ethical Hacker (CEH) Training','https://www.eccouncil.org/train-certify/certified-ethical-hacker-ceh/'],
+                        ['Network Security by Cisco','https://www.netacad.com/courses/cybersecurity'],
+                        ['Cybersecurity Specialization by University of Maryland','https://www.coursera.org/specializations/cyber-security'],
+                        ['Introduction to Cyber Security [Free]','https://www.futurelearn.com/courses/introduction-to-cyber-security'],
+                        ['Kali Linux Tutorial for Beginners [Free]','https://youtu.be/lZAoFs75_cs']]
+
+cloud_course = [['AWS Certified Solutions Architect Associate','https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/'],
+                ['Google Cloud Professional Cloud Architect','https://www.coursera.org/professional-certificates/gcp-cloud-architect'],
+                ['Microsoft Azure Fundamentals AZ-900','https://www.udemy.com/course/az900-azure/'],
+                ['Docker and Kubernetes: The Complete Guide','https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/'],
+                ['Terraform Associate Certification','https://www.udemy.com/course/terraform-beginner-to-advanced/'],
+                ['AWS Cloud Practitioner Essentials','https://www.coursera.org/learn/aws-cloud-practitioner-essentials'],
+                ['DevOps Engineering on AWS','https://www.coursera.org/specializations/aws-devops'],
+                ['Kubernetes for Developers [Free]','https://www.edx.org/learn/kubernetes/the-linux-foundation-introduction-to-kubernetes'],
+                ['Cloud Computing Fundamentals by IBM','https://www.coursera.org/learn/introduction-to-cloud'],
+                ['AWS Free Tier Hands-on Labs [Free]','https://aws.amazon.com/free/']]
+
+data_analyst_course = [['Google Data Analytics Professional Certificate','https://www.coursera.org/professional-certificates/google-data-analytics'],
+                       ['IBM Data Analyst Professional Certificate','https://www.coursera.org/professional-certificates/ibm-data-analyst'],
+                       ['Microsoft Power BI Data Analyst','https://www.coursera.org/professional-certificates/microsoft-power-bi-data-analyst'],
+                       ['SQL for Data Science','https://www.coursera.org/learn/sql-for-data-science'],
+                       ['Tableau Training for Data Science','https://www.udemy.com/course/tableau10/'],
+                       ['Excel Skills for Business Specialization','https://www.coursera.org/specializations/excel'],
+                       ['Statistics with Python Specialization','https://www.coursera.org/specializations/statistics-with-python'],
+                       ['Data Visualization with Python [Free]','https://www.coursera.org/learn/python-for-data-visualization'],
+                       ['Business Intelligence Analyst Course','https://www.udemy.com/course/the-business-intelligence-analyst-course-2018/'],
+                       ['Data Analysis with Python [Free]','https://www.freecodecamp.org/learn/data-analysis-with-python/']]
+
+ml_ai_course = [['Machine Learning Specialization by Andrew Ng','https://www.coursera.org/specializations/machine-learning-introduction'],
+                ['Deep Learning Specialization','https://www.coursera.org/specializations/deep-learning'],
+                ['TensorFlow Developer Professional Certificate','https://www.coursera.org/professional-certificates/tensorflow-in-practice'],
+                ['PyTorch for Deep Learning','https://www.udemy.com/course/pytorch-for-deep-learning-with-python-bootcamp/'],
+                ['Natural Language Processing Specialization','https://www.coursera.org/specializations/natural-language-processing'],
+                ['MLOps Specialization','https://www.coursera.org/specializations/machine-learning-engineering-for-production-mlops'],
+                ['Generative AI with LLMs','https://www.coursera.org/learn/generative-ai-with-llms'],
+                ['Computer Vision with OpenCV','https://www.udemy.com/course/python-for-computer-vision-with-opencv-and-deep-learning/'],
+                ['Machine Learning A-Z','https://www.udemy.com/course/machinelearning/'],
+                ['Fast.ai Practical Deep Learning [Free]','https://course.fast.ai/']]
+
+devops_course = [['DevOps Engineering on AWS','https://www.coursera.org/specializations/aws-devops'],
+                 ['Docker and Kubernetes: The Complete Guide','https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/'],
+                 ['Terraform Associate Certification','https://www.udemy.com/course/terraform-beginner-to-advanced/'],
+                 ['Jenkins Complete Course','https://www.udemy.com/course/jenkins-from-zero-to-hero/'],
+                 ['Linux Administration Bootcamp','https://www.udemy.com/course/linux-administration-bootcamp/'],
+                 ['GitLab CI/CD for DevOps','https://www.udemy.com/course/gitlab-ci-pipelines-ci-cd-and-devops-for-beginners/'],
+                 ['Kubernetes Certified Administrator (CKA)','https://www.udemy.com/course/certified-kubernetes-administrator-with-practice-tests/'],
+                 ['Ansible for DevOps','https://www.udemy.com/course/learn-ansible/'],
+                 ['Site Reliability Engineering by Google','https://www.coursera.org/specializations/site-reliability-engineering'],
+                 ['DevOps Prerequisites Course [Free]','https://www.youtube.com/watch?v=Wvf0mBNGjXY']]
+
 resume_videos = [ 'https://youtu.be/Tt08KmFfIYQ','https://youtu.be/y8YH0Qbu5h4',
                   'https://youtu.be/u75hUSShvnc','https://youtu.be/BYUy1yvjHxE',
                   'https://youtu.be/KFaugkGVeNQ','https://youtu.be/3agP4x8LYFM',
