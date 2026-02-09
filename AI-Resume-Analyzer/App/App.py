@@ -466,21 +466,26 @@ def load_css():
         }
         
         .navbar-brand {
-            font-size: 4rem;
+            font-size: 5rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -0.03em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: block;
+            text-align: center;
             line-height: 1.2;
-            position: relative;
-            z-index: 200;
-            margin-top: -10px;
+            margin: 0 0 8px 0;
             padding-bottom: 4px;
+        }
+        
+        .navbar-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin: 0 0 24px 0;
+            font-weight: 400;
         }
         
         .navbar-nav {
@@ -1422,35 +1427,39 @@ def render_navbar(username):
     # Get current page for active state
     current_page = st.session_state.get('page', 'dashboard')
     
-    # Create columns for navigation using Streamlit buttons inside navbar area
-    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6 = st.columns([1.5, 1, 1, 1, 1, 1.5])
+    # Title on top
+    st.markdown('<div class="navbar-brand">SKILLEDGE</div>', unsafe_allow_html=True)
+    st.markdown('<p class="navbar-subtitle">AI-Powered Resume Intelligence that analyzes skills, predicts career paths, and prepares you for interviews.</p>', unsafe_allow_html=True)
+    
+    # Navigation buttons below
+    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 1])
+    
+    # Show "Dashboard" if resume was uploaded, otherwise "Upload"
+    upload_btn_text = "Dashboard" if st.session_state.get('resume_uploaded', False) else "Upload"
     
     with nav_col1:
-        st.markdown('<div class="navbar-brand">skilledge</div>', unsafe_allow_html=True)
-    
-    with nav_col2:
-        if st.button("Dashboard", use_container_width=True, key="nav_dashboard", type="secondary" if current_page != 'dashboard' else "primary"):
+        if st.button(upload_btn_text, use_container_width=True, key="nav_dashboard", type="secondary" if current_page != 'dashboard' else "primary"):
             st.session_state.page = 'dashboard'
             st.rerun()
     
-    with nav_col3:
+    with nav_col2:
         if st.button("About", use_container_width=True, key="nav_about", type="secondary" if current_page != 'about' else "primary"):
             st.session_state.page = 'about'
             st.rerun()
     
-    with nav_col4:
+    with nav_col3:
         if st.button("Feedback", use_container_width=True, key="nav_feedback", type="secondary" if current_page != 'feedback' else "primary"):
             st.session_state.page = 'feedback'
             st.rerun()
     
-    with nav_col5:
+    with nav_col4:
         if st.button("Sign Out", use_container_width=True, key="nav_logout", type="secondary"):
             st.session_state.logged_in = False
             st.session_state.username = None
             st.session_state.page = 'login'
             st.rerun()
     
-    with nav_col6:
+    with nav_col5:
         st.markdown(f'<div class="navbar-user">{username}</div>', unsafe_allow_html=True)
     
     st.markdown("<hr style='border: none; border-top: 1px solid var(--separator); margin: 16px 0 32px 0;'>", unsafe_allow_html=True)
@@ -2652,6 +2661,9 @@ def show_dashboard():
                 f.write(pdf_file.getbuffer())
                 f.flush()  # Ensure file is written to disk
                 os.fsync(f.fileno())  # Force write to disk
+            
+            # Mark that resume has been uploaded
+            st.session_state.resume_uploaded = True
             
             # Verify file was saved correctly
             if not os.path.exists(save_image_path):
