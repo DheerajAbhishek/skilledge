@@ -3307,7 +3307,7 @@ def show_dashboard():
                     elif i.lower() in cloud_keyword:
                         print(i.lower())
                         reco_field = 'Cloud Computing'
-                        st.success("** Our analysis says you are looking for Cloud Computing Jobs **")
+                        st.success("Our analysis says you are looking for Cloud Computing Jobs")
                         recommended_skills = ['AWS','Azure','GCP','Docker','Kubernetes','Terraform','Linux','CI/CD','Jenkins','Python','Networking','IAM','CloudFormation','Serverless','Microservices','Monitoring','Ansible','Git']
                         recommended_keywords = st_tags(label='### Recommended skills for you.',
                         text='Recommended skills generated from System',value=recommended_skills,key = '8')
