@@ -466,7 +466,7 @@ def load_css():
         }
         
         .navbar-brand {
-            font-size: 2rem;
+            font-size: 4rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
             -webkit-background-clip: text;
@@ -476,30 +476,27 @@ def load_css():
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        
-        .navbar-brand::before {
-            content: "";
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--system-blue) 0%, var(--system-purple) 50%, var(--system-pink) 100%);
-            border-radius: var(--radius-sm);
-            display: inline-block;
+            line-height: 1.2;
+            position: relative;
+            z-index: 200;
+            margin-top: -10px;
+            padding-bottom: 4px;
         }
         
         .navbar-nav {
             display: flex;
             gap: 8px;
             align-items: center;
+            height: 100%;
         }
         
         .navbar-nav-btn {
             background: transparent;
             border: none;
             color: var(--text-primary);
-            font-size: 0.875rem;
+            font-size: 1rem;
             font-weight: 500;
-            padding: 8px 16px;
+            padding: 12px 20px;
             border-radius: var(--radius-pill);
             cursor: pointer;
             transition: all var(--duration-fast) var(--spring-smooth);
@@ -2461,7 +2458,6 @@ def run():
     
     # If database is not available, skip authentication
     if not DB_AVAILABLE:
-        st.warning("Running in demo mode - Database unavailable. Authentication and data saving are disabled.")
         st.session_state.logged_in = True
         st.session_state.username = "Demo User"
         if st.session_state.page in ['login', 'signup']:
